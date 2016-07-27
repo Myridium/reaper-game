@@ -3,14 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package reaper.entity;
+package reaper;
 
 /**
  *
  * @author murdock
  */
-public interface IEntity<T> extends IDrawable, IEvolvable<T> {
-    public float getBoundingRadius();
-    public float getX();
-    public float getY();
+public class CVector {
+    public float x;
+    public float y;
+    
+    public CVector(float xIn, float yIn) {
+        x = xIn;
+        y = yIn;
+    }
 }

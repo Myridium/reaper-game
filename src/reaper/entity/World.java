@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import processing.core.PApplet;
 
 /**
  *
@@ -21,15 +20,20 @@ public class World implements IDrawable, IEvolvable<World> {
     Player player;
     PelletCollection pc;
     private static final int LAYER = 0;
+    private int width, height;
     
-    public World() {
+    public World(int w, int h) {
+        
+        width = w;
+        height = h;
+        
         entities = new ArrayList<>();    
         
-        player = new Player(300,300);
+        player = new Player(width/2,height/2);
         pc = new PelletCollection();
-        pc.setSpawnCenter(600, 450);
+        pc.setSpawnCenter(width/2, height/2);
         pc.setSpawnFreq(10, 100);
-        pc.setSpawnRadius(800);
+        pc.setSpawnRadius(Math.max(width, height));
         pc.setSpawnVelMag(10,500);
         pc.setAutoSpawn(true);
         
@@ -58,15 +62,33 @@ public class World implements IDrawable, IEvolvable<World> {
     }
     
     @Override
-    public void prepareDraw(PApplet p) {
+    public void prepareDraw() {
         //Nothing needs to be done!
     }
     @Override
-    public void draw(PApplet p) {
+    public void draw() {
         this.sortEntitiesByLayer(entities);
+        
         for (IEntity e : entities) {
-            e.prepareDraw(p);
-            e.draw(p);
+            
+            
+            float bRad = e.getBoundingRadius();
+            // If the entity is out of frame, then don't bother drawing it.
+            if (    bRad != -1 && (
+                    (e.getX() < 0 - bRad)
+                    ||
+                    (e.getX() > this.width - bRad)
+                    ||
+                    (e.getY() < 0 - bRad)
+                    ||
+                    (e.getX() > this.height - bRad)
+                    )
+                ) {
+                continue;
+            }
+
+            e.prepareDraw();
+            e.draw();
         }
     }
     @Override
@@ -74,7 +96,7 @@ public class World implements IDrawable, IEvolvable<World> {
         
         List<IEntity<?>> es = new ArrayList<>();
         
-        World w = new World();
+        World w = new World(width,height);
         
         for (IEntity e : entities) {
             IEntity cloned = (IEntity)e.deepClone();

@@ -5,14 +5,12 @@
  */
 package reaper.entity;
 
-import processing.core.PApplet;
-
 /**
  *
  * @author murdock
  */
 public interface IDrawable {
-    public void prepareDraw(PApplet pApplet);
-    public void draw(PApplet pApplet);
+    public void prepareDraw();
+    public void draw();
     public int getLayer();
 }
