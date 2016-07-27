@@ -50,6 +50,7 @@ public final class World implements IDrawable, IEvolvable<World> {
     @Override
     public void evolve(long timestep) {
         
+        // World-dependent evolution/physics goes here//////////////////////////
         float secondsElapsed = timestep/(1000f*1000f*1000f);
         
         // This is called both here and in drawAuxilliaries.
@@ -67,7 +68,10 @@ public final class World implements IDrawable, IEvolvable<World> {
             }
         }
         
+        player.grow(secondsElapsed*3f);
+        ////////////////////////////////////////////////////////////////////////
         
+        // Let the entities evolve as is specified in their own classes
         for (IEntity e : entities) {
             e.evolve(timestep);
         }

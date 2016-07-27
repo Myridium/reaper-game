@@ -74,6 +74,17 @@ public class Player implements IEntity<Player> {
         vel.x = xvel;
         vel.y = yvel;
     }
+    public void shrink(float amount) {
+        setCollideRadius(
+                Math.min(
+                        Math.max(5, collideRadius-amount)
+                ,
+                captureEffectiveRadius)
+        );
+    }
+    public void grow(float amount) {
+        shrink(-amount);
+    }
     
     private void refreshFociiDistance() {
         captureFociiSeparation = maxFociiSeparation*fociiSeparationRelative;
@@ -133,6 +144,7 @@ public class Player implements IEntity<Player> {
         return pv;
     }
     
+    // From implementing IDrawable
     @Override
     public int getLayer() {
         return LAYER;
@@ -152,6 +164,8 @@ public class Player implements IEntity<Player> {
         GLDrawHelper.ellipse(cx, cy, getCaptureMinorRadius(), getCaptureMajorRadius(), captureAngle);
         
     }
+    
+    // From implementing IEvolvable
     @Override
     public void evolve(long nanoTimestep) {
         float secondsElapsed = nanoTimestep/(1000f*1000f*1000f);
@@ -171,6 +185,21 @@ public class Player implements IEntity<Player> {
         
         return p;
     }
+
+    // From implementing IEntity
+    @Override
+    public float getBoundingRadius() {
+        // dunno lel
+        return -1;
+    }
+    @Override
+    public float getX() {
+        return pos.x;
+    }
+    @Override
+    public float getY() {
+        return pos.y;
+    }
     
     public boolean inCaptureRange(float x, float y) {
         
@@ -189,26 +218,9 @@ public class Player implements IEntity<Player> {
         relY = relY;
         return (Math.pow(relY/getCaptureMinorRadius(),2) + Math.pow(relX/getCaptureMajorRadius(),2) <= 1);
     }
-    
     public boolean isColliding(float x, float y) {
         float relX = x - pos.x;
         float relY = y - pos.y;
         return ((relX*relX) + (relY*relY)) <= (collideRadius*collideRadius);
-    }
-
-    @Override
-    public float getBoundingRadius() {
-        // dunno lel
-        return -1;
-    }
-
-    @Override
-    public float getX() {
-        return pos.x;
-    }
-
-    @Override
-    public float getY() {
-        return pos.y;
     }
 }
