@@ -5,16 +5,18 @@
  */
 package reaper.entity;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import reaper.GLDrawHelper;
 
 /**
  *
  * @author murdock
  */
-public class World implements IDrawable, IEvolvable<World> {
+public final class World implements IDrawable, IEvolvable<World> {
     
     List<IEntity<?>> entities;
     Player player;
@@ -34,7 +36,7 @@ public class World implements IDrawable, IEvolvable<World> {
         pc.setSpawnCenter(width/2, height/2);
         pc.setSpawnFreq(10, 100);
         pc.setSpawnRadius(Math.max(width, height));
-        pc.setSpawnVelMag(10,500);
+        pc.setSpawnVelMag(10,100);
         pc.setAutoSpawn(true);
         
         addEntity(player);
@@ -48,13 +50,23 @@ public class World implements IDrawable, IEvolvable<World> {
     @Override
     public void evolve(long timestep) {
         
-        List<PelletCollection.Pellet> pL = pc.getPellets();
-        //Health drop rate of 5 per second
         float secondsElapsed = timestep/(1000f*1000f*1000f);
-        for (PelletCollection.Pellet p : pL) {
-            if (player.inCaptureRange(p.pos.x, p.pos.y))
-                p.health -= secondsElapsed*5;
+        
+        // This is called both here and in drawAuxilliaries.
+        // It's a bit inefficient, but not a bottleneck. I've left it for now.
+        List<PelletCollection.Pellet> endP = pc.getEndangeredPellets(player);
+        
+        List<PelletCollection.Pellet> allP = pc.getPellets();
+        for (PelletCollection.Pellet p : allP) {
+            if (endP.contains(p)) {
+                //Health drop rate of 5 per second
+                p.damage(secondsElapsed*player.getCapturePower());
+            } else {
+                //Automatic health regeneration
+                p.heal(secondsElapsed*1f);
+            }
         }
+        
         
         for (IEntity e : entities) {
             e.evolve(timestep);
@@ -67,7 +79,7 @@ public class World implements IDrawable, IEvolvable<World> {
     }
     @Override
     public void draw() {
-        this.sortEntitiesByLayer(entities);
+        World.sortEntitiesByLayer(entities);
         
         for (IEntity e : entities) {
             
@@ -89,8 +101,28 @@ public class World implements IDrawable, IEvolvable<World> {
 
             e.prepareDraw();
             e.draw();
+            this.drawAuxilliaries();
         }
     }
+    
+    // This method draws extra cosmetic things that are not directly tied to an entity,
+    // and have no physics. (So need need to call .evolve() on them).
+    private void drawAuxilliaries() {
+        
+        // Draw lines connecting pellets to player
+        GLDrawHelper.setStrokeWidth(2);
+        GLDrawHelper.setColor(Color.GREEN);
+        List<PelletCollection.Pellet> endangeredPellets = pc.getEndangeredPellets(player);
+        
+        for (PelletCollection.Pellet p : endangeredPellets) {
+            float perc = p.getHealthPerc();
+            if (perc < 0.99f)
+                GLDrawHelper.line(player.getX(), player.getY(), p.getX(), p.getY(), 1 - perc);
+        }
+        
+    }
+    
+    
     @Override
     public World deepClone() {
         

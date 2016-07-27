@@ -37,6 +37,23 @@ public class GLDrawHelper {
     public static void setStrokeWidth(float width) {
         glLineWidth(width);
     }
+    
+    public static void line(float startX, float startY, float endX, float endY) {
+        glBegin(GL_LINES);
+            glVertex2f(startX,startY);
+            glVertex2f(endX,endY);
+        glEnd();
+    }
+    public static void line(float startX, float startY, float endX, float endY, float stretch) {
+        float aendX = (endX - startX)*stretch + startX;
+        float aendY = (endY - startY)*stretch + startY;
+        line(startX,startY,aendX,aendY);
+    }
+    public static void lineByAngle(float startX, float startY, float angle, float length) {
+        float endX = length*(float)Math.cos(angle) + startX;
+        float endY = length*(float)Math.sin(angle) + startY;
+        line(startX,startY,endX,endY);
+    }
     public static void disk(float x, float y, float radius) {
         ellipseFill(x,y,radius,radius,0);
     }

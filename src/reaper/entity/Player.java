@@ -20,6 +20,8 @@ public class Player implements IEntity<Player> {
     private CVector pos;
     private CVector vel;
     
+    private float capturePower;
+    
     //These first two determine the maximum focii separation
     private float collideRadius;
     private float captureEffectiveRadius;
@@ -36,13 +38,15 @@ public class Player implements IEntity<Player> {
     protected Player(float x, float y) {
         pos = new CVector(x,y);
         vel = new CVector(0,0);
-        collideRadius = 20;
-        captureEffectiveRadius = 100;
+        collideRadius = 30;
+        captureEffectiveRadius = 150;
         fociiSeparationRelative = 0;        
         captureAngle=(float)Math.PI/8f;
         refreshMaxFociiSeparation();
         refreshFociiDistance();
         refreshRadii();
+        
+        capturePower = 5f;
     }
     
     public void setEffectiveCaptureRadius(float rad) {
@@ -102,6 +106,9 @@ public class Player implements IEntity<Player> {
         captureUpperBoundSq = (float)Math.pow(2*captureMajorRadius-collideRadius, 2);
     }
     
+    public float getCapturePower() {
+        return capturePower;
+    }
     public float getEffectiveRadius() {
         return captureEffectiveRadius;
     }
@@ -160,6 +167,7 @@ public class Player implements IEntity<Player> {
         p.setEffectiveCaptureRadius(captureEffectiveRadius);
         p.setFociiRelativeDistance(fociiSeparationRelative);
         p.captureUpperBoundSq = this.captureUpperBoundSq;
+        p.capturePower = this.capturePower;
         
         return p;
     }

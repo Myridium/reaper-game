@@ -27,6 +27,16 @@ public class ReaperFrameLooper {
     
     int framesToNextPellet;
     
+    public class NoControllerException extends Exception {
+        
+        public NoControllerException(String msg) {
+            super(msg);
+        }
+        public NoControllerException() {
+            super();
+        }
+    }
+    
     public void init(int width, int height) {
      
         world = new World(width,height);
@@ -37,7 +47,7 @@ public class ReaperFrameLooper {
         
     }
     
-    public void frame() {
+    public void frame() throws NoControllerException {
         long elapsedTime = 0 - (currentTime) + (currentTime = System.nanoTime());
         /*In case the simulation can't keep up with the frame advancement, we should put an upper limit on how much the physics will advance per frame*/
         elapsedTime = Math.min(elapsedTime, MAX_FRAME_TIME);
@@ -57,6 +67,12 @@ public class ReaperFrameLooper {
         
         //glfwPollEvents();
         FloatBuffer fb = glfwGetJoystickAxes(GLFW_JOYSTICK_1);
+        if (fb == null) {
+            // Could not find the gamepad joystick
+            System.err.println("Could not find any joystick axes of the first controller.");
+            System.out.println("Aborting.");
+            throw new NoControllerException();
+        }
         
         //Need a deadzone, etc
         float xstick, ystick, mag, angle;

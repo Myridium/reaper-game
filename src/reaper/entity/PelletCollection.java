@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 import reaper.CVector;
 import reaper.GLDrawHelper;
 
@@ -100,6 +101,13 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         }
     }
     
+    public List<Pellet> getEndangeredPellets(Player player) {
+        // Collects pellets in "pellets" matching the criterion.
+        // In this case, the criterion is whether or not they are in the player's capture range.
+        List<Pellet> pelletsInCaptureRange = pellets.stream()
+                .filter(p -> player.inCaptureRange(p.getX(), p.getY())).collect(Collectors.toList());
+        return pelletsInCaptureRange;
+    }
     public void setSpawnCenter(float x, float y) {
         spawnDiskCenter = new CVector(x,y);
     }
@@ -301,10 +309,24 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             }
         }
         
-        private float getRadius() {
-            float healthPerc = health / defaultHealthOf(type);
-            return Math.max(Pellet.defaultRadiusOf(type)*healthPerc, 1);
+        public float getHealthPerc() {
+            return health / defaultHealthOf(type);
         }
+        private float getRadius() {
+            return Math.max(Pellet.defaultRadiusOf(type)*getHealthPerc(), 1);
+        }
+        
+        public void damage(float amount) {
+            heal(-amount);
+        }
+        public void heal(float amount) {
+            if (isDead()) {
+                // Do nothing
+                return;
+            }
+            health = Math.min(health + amount, defaultHealthOf(type));
+        }
+        
         /*This is made protected because the 'draw' method should not be called without first preparing to draw it (i.e. by changing stroke type and whatnot)*/
         @Override
         public void draw() {

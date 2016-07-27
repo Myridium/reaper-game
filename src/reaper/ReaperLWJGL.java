@@ -5,7 +5,6 @@
  */
 package reaper;
 
-import java.awt.Color;
 import org.lwjgl.*;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -40,6 +39,8 @@ public class ReaperLWJGL {
             //Free the window callbacks and destroy the window
             glfwFreeCallbacks(gameWindow);
             glfwDestroyWindow(gameWindow);
+        } catch (ReaperFrameLooper.NoControllerException e) {
+            return;
         } finally {
             glfwTerminate();
             glfwSetErrorCallback(null).free();
@@ -68,9 +69,9 @@ public class ReaperLWJGL {
             throw new RuntimeException("Failed to create the GLFW window!");
         
         // Setup a key callback. It will be called every time a key is presed, repeated or released.
-        glfwSetKeyCallback(gameWindow, (gameWindow, key, scancode, action, mods) -> {
+        glfwSetKeyCallback(gameWindow, (gw, key, scancode, action, mods) -> {
             if (key == GLFW_KEY_ESCAPE && action == GLFW_RELEASE )
-                glfwSetWindowShouldClose(gameWindow,true);
+                glfwSetWindowShouldClose(gw,true);
         });
         
         // Get the resolution of the primary monitor
@@ -99,7 +100,7 @@ public class ReaperLWJGL {
         
     }
     
-    public void loop() throws InterruptedException {
+    public void loop() throws InterruptedException, ReaperFrameLooper.NoControllerException {
         
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
