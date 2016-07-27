@@ -27,9 +27,9 @@ public class ReaperFrameLooper {
     
     int framesToNextPellet;
     
-    public void init() {
+    public void init(int width, int height) {
      
-        world = new World();
+        world = new World(width,height);
         player = world.getPlayer();
         
         currentTime = System.nanoTime();

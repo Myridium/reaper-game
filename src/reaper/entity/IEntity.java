@@ -10,5 +10,7 @@ package reaper.entity;
  * @author murdock
  */
 public interface IEntity<T> extends IDrawable, IEvolvable<T> {
-    
+    public float getBoundingRadius();
+    public float getX();
+    public float getY();
 }

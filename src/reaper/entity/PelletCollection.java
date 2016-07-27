@@ -181,6 +181,21 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         float dist2 = (pX*pX) + (pY*pY);
         return (dist2 > spawnRadius*spawnRadius*2);
     }
+
+    @Override
+    public float getBoundingRadius() {
+        return -1;
+    }
+
+    @Override
+    public float getX() {
+        return -1;
+    }
+
+    @Override
+    public float getY() {
+        return -1;
+    }
     
     public static class Pellet implements IEntity<Pellet> {
         
@@ -208,6 +223,21 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             Pellet p = new Pellet(type, pos, vel);
             p.health = this.health;
             return p;
+        }
+
+        @Override
+        public float getBoundingRadius() {
+            return getRadius()*1.2f;
+        }
+
+        @Override
+        public float getX() {
+            return pos.x;
+        }
+
+        @Override
+        public float getY() {
+            return pos.y;
         }
 
         public enum Type {
@@ -272,13 +302,15 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             }
         }
         
+        private float getRadius() {
+            float healthPerc = health / defaultHealthOf(type);
+            return Math.max(Pellet.defaultRadiusOf(type)*healthPerc, 1);
+        }
         /*This is made protected because the 'draw' method should not be called without first preparing to draw it (i.e. by changing stroke type and whatnot)*/
         @Override
         public void draw() {
-            float healthPerc = health / defaultHealthOf(type);
-            float drawRad = Math.max(Pellet.defaultRadiusOf(type)*healthPerc, 1);
             
-            GLDrawHelper.circle(pos.x, pos.y, drawRad);
+            GLDrawHelper.circle(pos.x, pos.y, getRadius());
             
         }
         @Override

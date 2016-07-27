@@ -25,6 +25,9 @@ public class ReaperLWJGL {
     private long gameWindow;
     private final long minFrameWaitNanoTime = Math.round(1000*1000*1000/120);
     
+    private final int WIDTH = 1200;
+    private final int HEIGHT = 900;
+    
     private ReaperFrameLooper reaperFrameLoop;
     
     public void run() throws InterruptedException {
@@ -57,9 +60,6 @@ public class ReaperLWJGL {
         glfwDefaultWindowHints(); // optional, the current window hints are already the default
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); // The window should be invisible until we're ready to display it.
         glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-        
-        int WIDTH = 1200;
-        int HEIGHT = 900;
         
         // Create the window and assign the handle to gameWindow
         // Note that the NULL object is a constant defined in the LWJGL libraries.
@@ -113,14 +113,14 @@ public class ReaperLWJGL {
         
         GL11.glMatrixMode(GL_PROJECTION);
         GL11.glLoadIdentity();
-        GL11.glOrtho(0, 1200, 0, 900, -1, 1);
+        GL11.glOrtho(0, WIDTH, 0, HEIGHT, -1, 1);
         GL11.glMatrixMode(GL_MODELVIEW);
         
         GL11.glDisable(GL_DEPTH_TEST);
         GL11.glEnable(GL_BLEND);
         GL11.glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
 
-        reaperFrameLoop.init();
+        reaperFrameLoop.init(WIDTH, HEIGHT);
         
         long currentTime = System.nanoTime();
         // Run the rendering loop until the user has attempted to close

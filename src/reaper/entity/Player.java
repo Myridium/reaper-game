@@ -188,4 +188,20 @@ public class Player implements IEntity<Player> {
         float relY = y - pos.y;
         return ((relX*relX) + (relY*relY)) <= (collideRadius*collideRadius);
     }
+
+    @Override
+    public float getBoundingRadius() {
+        // dunno lel
+        return -1;
+    }
+
+    @Override
+    public float getX() {
+        return pos.x;
+    }
+
+    @Override
+    public float getY() {
+        return pos.y;
+    }
 }
