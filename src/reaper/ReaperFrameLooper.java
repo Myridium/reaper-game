@@ -6,11 +6,7 @@
 package reaper;
 
 import java.nio.FloatBuffer;
-import java.util.ArrayList;
-import java.util.List;
-import org.lwjgl.glfw.GLFW;
 import static org.lwjgl.glfw.GLFW.*;
-import processing.core.PApplet;
 import reaper.entity.Player;
 import reaper.entity.World;
 
@@ -18,7 +14,7 @@ import reaper.entity.World;
  *
  * @author murdock
  */
-public class ReaperPApplet extends PApplet {
+public class ReaperFrameLooper {
     
     final long dt = 1000*1000*1000 / 1000;
     final long MAX_FRAME_TIME = (1000*1000*1000) / 10;
@@ -31,30 +27,17 @@ public class ReaperPApplet extends PApplet {
     
     int framesToNextPellet;
     
-    @Override
-    public void settings() {
-        size(1200,900);
-    }
-    
-    @Override
-    public void setup() {
-        frameRate(60);
+    public void init() {
+     
         world = new World();
         player = world.getPlayer();
         
         currentTime = System.nanoTime();
         accumulator = 0;
         
-        glfwInit();
     }
     
-    @Override
-    public void exit() {
-        glfwTerminate();
-    }
-    
-    @Override
-    public void draw() {
+    public void frame() {
         long elapsedTime = 0 - (currentTime) + (currentTime = System.nanoTime());
         /*In case the simulation can't keep up with the frame advancement, we should put an upper limit on how much the physics will advance per frame*/
         elapsedTime = Math.min(elapsedTime, MAX_FRAME_TIME);
@@ -72,13 +55,13 @@ public class ReaperPApplet extends PApplet {
         //Axis 6 - unused
         //Axis 7 - unused
         
-        glfwPollEvents();
+        //glfwPollEvents();
         FloatBuffer fb = glfwGetJoystickAxes(GLFW_JOYSTICK_1);
         
         //Need a deadzone, etc
         float xstick, ystick, mag, angle;
         xstick = fb.get(0);
-        ystick = fb.get(1);
+        ystick = -fb.get(1);
         
         mag = (float)Math.sqrt((xstick*xstick) + (ystick*ystick));
         mag = (float)Math.min(Math.max(mag-0.3, 0),0.6);
@@ -111,11 +94,7 @@ public class ReaperPApplet extends PApplet {
         World w = world.spoofEvolve(accumulator);
         
         
-        background(0);
-        w.draw(this);
+        w.draw();
     }
     
-    private void queueNextPellet() {
-        
-    }
 }

@@ -21,7 +21,8 @@ public class ReaperLauncher {
      */
     public static void main(String[] args) throws IOException, InterruptedException {
         
-        PApplet.main(new String[]{"reaper.ReaperPApplet"});
+        new ReaperLWJGL().run();
+        //PApplet.main(new String[]{"reaper.ReaperPApplet"});
         
     }
     

@@ -8,6 +8,7 @@ package reaper.entity;
 import java.awt.Color;
 import processing.core.PApplet;
 import processing.core.PVector;
+import reaper.GLDrawHelper;
 
 /**
  *
@@ -117,10 +118,12 @@ public class Player implements IEntity<Player> {
     public PVector getCaptureCenter() {
         //The collision circle is centered on one of the focii.
         PVector pv;
-        float x,y;
-        x = pos.x + (float)(Math.cos(captureAngle)*captureFociiSeparation/2);
-        y = pos.y + (float)(-Math.sin(captureAngle)*captureFociiSeparation/2);
-        pv = new PVector(x,y);
+        
+        float cx = pos.x, cy = pos.y, fsOn2 = getFociiSeparation()/2;
+        cx += fsOn2*Math.cos(captureAngle);
+        cy += fsOn2*Math.sin(captureAngle);
+        
+        pv = new PVector(cx,cy);
         return pv;
     }
     
@@ -129,22 +132,18 @@ public class Player implements IEntity<Player> {
         return LAYER;
     }
     @Override
-    public void prepareDraw(PApplet pApplet) {
-        pApplet.noFill();
-        pApplet.stroke(Color.RED.getRGB());
-        pApplet.strokeWeight(1);
-        pApplet.ellipseMode(PApplet.RADIUS);
+    public void prepareDraw() {
+        GLDrawHelper.setColor(1, 0, 0);
+        GLDrawHelper.setStrokeWidth(1);
     }
     @Override
-    public void draw(PApplet pApplet) {
+    public void draw() {
         
-        pApplet.pushMatrix();
-        pApplet.translate(pos.x,pos.y);
-        pApplet.ellipse(0, 0, collideRadius, collideRadius);
-        pApplet.stroke(Color.GRAY.getRGB());
-        pApplet.rotate(-captureAngle);
-        pApplet.ellipse(getFociiSeparation()/2, 0, getCaptureMajorRadius(), getCaptureMinorRadius());
-        pApplet.popMatrix();
+        GLDrawHelper.circle(pos.x, pos.y, collideRadius);
+        GLDrawHelper.setColor(Color.GRAY);
+        PVector pv = getCaptureCenter();
+        float cx = pv.x, cy = pv.y;
+        GLDrawHelper.ellipse(cx, cy, getCaptureMinorRadius(), getCaptureMajorRadius(), captureAngle);
         
     }
     @Override
@@ -178,8 +177,8 @@ public class Player implements IEntity<Player> {
         cache = x - captureCenter.x;
         relY = (y - captureCenter.y);
         //Rotate relX and relY so their coordinates align with those of the capture ellipse.
-        relX = (float)((Math.cos(-captureAngle)*cache) + (Math.sin(-captureAngle)*relY));
-        relY = (float)((-Math.sin(-captureAngle)*cache) + (Math.cos(-captureAngle)*relY));
+        relX = (float)((Math.cos(captureAngle)*cache) + (Math.sin(captureAngle)*relY));
+        relY = (float)((-Math.sin(captureAngle)*cache) + (Math.cos(captureAngle)*relY));
         relY = relY;
         return (Math.pow(relY/getCaptureMinorRadius(),2) + Math.pow(relX/getCaptureMajorRadius(),2) <= 1);
     }

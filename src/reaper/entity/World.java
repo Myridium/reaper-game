@@ -58,15 +58,15 @@ public class World implements IDrawable, IEvolvable<World> {
     }
     
     @Override
-    public void prepareDraw(PApplet p) {
+    public void prepareDraw() {
         //Nothing needs to be done!
     }
     @Override
-    public void draw(PApplet p) {
+    public void draw() {
         this.sortEntitiesByLayer(entities);
         for (IEntity e : entities) {
-            e.prepareDraw(p);
-            e.draw(p);
+            e.prepareDraw();
+            e.draw();
         }
     }
     @Override

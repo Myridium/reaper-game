@@ -13,6 +13,7 @@ import java.util.Comparator;
 import java.util.List;
 import processing.core.PApplet;
 import processing.core.PVector;
+import reaper.GLDrawHelper;
 
 /**
  *
@@ -49,7 +50,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         return LAYER;
     }
     @Override
-    public void draw(PApplet pApplet) {
+    public void draw() {
         
         PelletCollection.sortPelletsByType(pellets);
         
@@ -57,14 +58,14 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         for (Pellet p : pellets) {
             if (pTypeBeingDrawn != (pTypeBeingDrawn = p.type)) {
                 //Update the way we need to draw this new type of pellet.
-                p.prepareDraw(pApplet);
+                p.prepareDraw();
             }
-            p.draw(pApplet);
+            p.draw();
         }
         
     }
     @Override
-    public void prepareDraw(PApplet pApplet) {
+    public void prepareDraw() {
         /*No preparation needs to be done! */
     }
     @Override
@@ -226,7 +227,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             */
         }
         
-        public static int colorOf(Type t) {
+        public static Color colorOf(Type t) {
             Color c;
             switch (t) {
                 case NORMAL:
@@ -247,7 +248,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             
             /*Color.getRGB() actually returns ARGB*/
             /*Doing this requires overwriting what is normally the leading bit indicating the sign of the integer*/
-            return c.getRGB();
+            return c;
             
         }
         public static float strokeWeightOf(Type t) {
@@ -273,18 +274,18 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         
         /*This is made protected because the 'draw' method should not be called without first preparing to draw it (i.e. by changing stroke type and whatnot)*/
         @Override
-        public void draw(PApplet pApplet) {
+        public void draw() {
             float healthPerc = health / defaultHealthOf(type);
             float drawRad = Math.max(Pellet.defaultRadiusOf(type)*healthPerc, 1);
-            pApplet.ellipse(pos.x, pos.y, drawRad, drawRad);
+            
+            GLDrawHelper.circle(pos.x, pos.y, drawRad);
+            
         }
         @Override
-        public void prepareDraw(PApplet pApplet) {
-            pApplet.noFill();
-            pApplet.stroke(Pellet.colorOf(type));
-            pApplet.colorMode(PApplet.RGB);
-            pApplet.strokeWeight(Pellet.strokeWeightOf(type));
-            pApplet.ellipseMode(PApplet.RADIUS);
+        public void prepareDraw() {
+            
+            GLDrawHelper.setStrokeWidth(Pellet.strokeWeightOf(type));
+            GLDrawHelper.setColor(Pellet.colorOf(type));
         }
         
         protected Pellet(Type t, PVector posIn, PVector velIn) {
