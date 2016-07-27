@@ -3,14 +3,18 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package reaper.entity;
+package reaper;
 
 /**
  *
  * @author murdock
  */
-public interface IDrawable {
-    public void prepareDraw();
-    public void draw();
-    public int getLayer();
+public class CVector {
+    public float x;
+    public float y;
+    
+    public CVector(float xIn, float yIn) {
+        x = xIn;
+        y = yIn;
+    }
 }

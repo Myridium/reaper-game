@@ -6,8 +6,7 @@
 package reaper.entity;
 
 import java.awt.Color;
-import processing.core.PApplet;
-import processing.core.PVector;
+import reaper.CVector;
 import reaper.GLDrawHelper;
 
 /**
@@ -18,8 +17,8 @@ public class Player implements IEntity<Player> {
 
     private static final int LAYER = 10;
     
-    private PVector pos;
-    private PVector vel;
+    private CVector pos;
+    private CVector vel;
     
     //These first two determine the maximum focii separation
     private float collideRadius;
@@ -35,12 +34,12 @@ public class Player implements IEntity<Player> {
     private float captureUpperBoundSq;
     
     protected Player(float x, float y) {
-        pos = new PVector(x,y);
-        vel = new PVector(0,0);
+        pos = new CVector(x,y);
+        vel = new CVector(0,0);
         collideRadius = 20;
         captureEffectiveRadius = 100;
         fociiSeparationRelative = 0;        
-        captureAngle=PApplet.PI/8;
+        captureAngle=(float)Math.PI/8f;
         refreshMaxFociiSeparation();
         refreshFociiDistance();
         refreshRadii();
@@ -115,15 +114,15 @@ public class Player implements IEntity<Player> {
     public float getCaptureMinorRadius() {    
         return captureMinorRadius;
     }
-    public PVector getCaptureCenter() {
+    public CVector getCaptureCenter() {
         //The collision circle is centered on one of the focii.
-        PVector pv;
+        CVector pv;
         
         float cx = pos.x, cy = pos.y, fsOn2 = getFociiSeparation()/2;
         cx += fsOn2*Math.cos(captureAngle);
         cy += fsOn2*Math.sin(captureAngle);
         
-        pv = new PVector(cx,cy);
+        pv = new CVector(cx,cy);
         return pv;
     }
     
@@ -141,7 +140,7 @@ public class Player implements IEntity<Player> {
         
         GLDrawHelper.circle(pos.x, pos.y, collideRadius);
         GLDrawHelper.setColor(Color.GRAY);
-        PVector pv = getCaptureCenter();
+        CVector pv = getCaptureCenter();
         float cx = pv.x, cy = pv.y;
         GLDrawHelper.ellipse(cx, cy, getCaptureMinorRadius(), getCaptureMajorRadius(), captureAngle);
         
@@ -172,7 +171,7 @@ public class Player implements IEntity<Player> {
         if (dist2 > captureUpperBoundSq)
             return false;
         
-        PVector captureCenter = getCaptureCenter();
+        CVector captureCenter = getCaptureCenter();
         float cache,relX, relY;
         cache = x - captureCenter.x;
         relY = (y - captureCenter.y);

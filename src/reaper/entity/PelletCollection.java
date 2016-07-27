@@ -11,8 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import processing.core.PApplet;
-import processing.core.PVector;
+import reaper.CVector;
 import reaper.GLDrawHelper;
 
 /**
@@ -24,7 +23,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
     private List<Pellet> pellets;
     private static final int LAYER = 20;
     
-    private PVector spawnDiskCenter;
+    private CVector spawnDiskCenter;
     private float spawnRadius;
     private float spawnVelMaxMag;
     private float spawnVelMinMag;
@@ -37,7 +36,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
     
     public PelletCollection() {
         pellets = new ArrayList<>();
-        spawnDiskCenter = new PVector(0,0);
+        spawnDiskCenter = new CVector(0,0);
         spawnRadius = 0;
         spawnVelMaxMag = 0;
         this.setSpawnFreq(1, 10);
@@ -102,7 +101,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
     }
     
     public void setSpawnCenter(float x, float y) {
-        spawnDiskCenter = new PVector(x,y);
+        spawnDiskCenter = new CVector(x,y);
     }
     public void setSpawnRadius(float rad) {
         spawnRadius = rad;
@@ -138,8 +137,8 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         float vxSpawn = vmag * (float)Math.cos(vangle);
         float vySpawn = vmag * (float)Math.sin(vangle);
         
-        PVector xySpawn = new PVector(xSpawn,ySpawn);
-        PVector vvSpawn = new PVector(vxSpawn,vySpawn);
+        CVector xySpawn = new CVector(xSpawn,ySpawn);
+        CVector vvSpawn = new CVector(vxSpawn,vySpawn);
         Pellet.Type type = Pellet.Type.NORMAL;
         
         Pellet p = new Pellet(type,xySpawn,vvSpawn);
@@ -199,8 +198,8 @@ public final class PelletCollection implements IEntity<PelletCollection> {
     
     public static class Pellet implements IEntity<Pellet> {
         
-        PVector pos;
-        PVector vel; //Velocity in pixels per second.
+        CVector pos;
+        CVector vel; //Velocity in pixels per second.
         Type type;
         float health; 
 
@@ -320,10 +319,10 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             GLDrawHelper.setColor(Pellet.colorOf(type));
         }
         
-        protected Pellet(Type t, PVector posIn, PVector velIn) {
+        protected Pellet(Type t, CVector posIn, CVector velIn) {
             type = t;
-            pos = new PVector(posIn.x,posIn.y);
-            vel = new PVector(velIn.x,velIn.y);    
+            pos = new CVector(posIn.x,posIn.y);
+            vel = new CVector(velIn.x,velIn.y);    
             health = defaultHealthOf(t);
         }
         
@@ -332,7 +331,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         }
     }
     
-    public void addPellet(Pellet.Type type, PVector pos, PVector vel) {
+    public void addPellet(Pellet.Type type, CVector pos, CVector vel) {
         pellets.add(new Pellet(type,pos,vel));
     }
     private void addPellet(Pellet p) {

@@ -6,7 +6,6 @@
 package reaper;
 
 import java.io.IOException;
-import processing.core.PApplet;
 
 /**
  *
