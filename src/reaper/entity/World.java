@@ -59,15 +59,27 @@ public final class World implements IDrawable, IEvolvable<World> {
         
         List<PelletCollection.Pellet> allP = pc.getPellets();
         for (PelletCollection.Pellet p : allP) {
+            // At the moment, this could just be done for pellets that are in capture range
+            // as they can't harm the player otherwise, but this could change.
+            if (player.distanceFrom(p.getX(), p.getY()) < p.getRadius())
+                player.damage(secondsElapsed*p.attackPower());
+            
             if (endP.contains(p)) {
                 //Health drop rate of 5 per second
                 p.damage(secondsElapsed*player.getCapturePower());
+                
+                //The PelletCollection will prune dead pellets when it is evolved.
+                //Before that happens, we'll check if the pellet is dead and if so, add health to the player.
+                if (p.isDead()) {
+                    player.shrink(6f);
+                }
             } else {
                 //Automatic health regeneration
                 p.heal(secondsElapsed*1f);
             }
         }
         
+        //player.heal(secondsElapsed*1f);
         player.grow(secondsElapsed*3f);
         ////////////////////////////////////////////////////////////////////////
         
@@ -105,8 +117,9 @@ public final class World implements IDrawable, IEvolvable<World> {
 
             e.prepareDraw();
             e.draw();
-            this.drawAuxilliaries();
         }
+        
+        this.drawAuxilliaries();
     }
     
     // This method draws extra cosmetic things that are not directly tied to an entity,
@@ -115,13 +128,22 @@ public final class World implements IDrawable, IEvolvable<World> {
         
         // Draw lines connecting pellets to player
         GLDrawHelper.setStrokeWidth(2);
-        GLDrawHelper.setColor(Color.GREEN);
         List<PelletCollection.Pellet> endangeredPellets = pc.getEndangeredPellets(player);
         
         for (PelletCollection.Pellet p : endangeredPellets) {
+            
             float perc = p.getHealthPerc();
-            if (perc < 0.99f)
+            
+            GLDrawHelper.setColor(Color.GRAY);
+            GLDrawHelper.setStrokeWidth(1);
+            GLDrawHelper.line(player.getX(), player.getY(), p.getX(), p.getY());
+            
+            if (perc < 0.99f) {
+                Color c  = p.absorbColor();
+                GLDrawHelper.setColor(c);
+                GLDrawHelper.setStrokeWidth(p.absorbLineWidth());
                 GLDrawHelper.line(player.getX(), player.getY(), p.getX(), p.getY(), 1 - perc);
+            }
         }
         
     }

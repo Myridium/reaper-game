@@ -11,6 +11,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.stream.Collectors;
 import reaper.CVector;
 import reaper.GLDrawHelper;
@@ -147,16 +148,26 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         
         CVector xySpawn = new CVector(xSpawn,ySpawn);
         CVector vvSpawn = new CVector(vxSpawn,vySpawn);
-        Pellet.Type type = Pellet.Type.NORMAL;
+        Pellet.Type type = randPelletType();
         
         Pellet p = new Pellet(type,xySpawn,vvSpawn);
         this.addPellet(p);
     }
     
-    private void removePellet(Pellet p) {
+    private Pellet.Type randPelletType() {
+        double rand = Math.random();
+        if (rand < 0.9)
+            return Pellet.Type.NORMAL;
+        if (rand < 0.94)
+            return Pellet.Type.HEALTH;
+        if (rand < 0.98)
+            return Pellet.Type.FOCUS;
+        return Pellet.Type.SUPER;
+    }
+    private void remove(Pellet p) {
         pellets.remove(p);
     }
-    private void removePellets(Collection<Pellet> cp) {
+    private void remove(Collection<Pellet> cp) {
         pellets.removeAll(cp);
     }
     private void prunePellets() {
@@ -166,7 +177,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             if(prunePredicate(p))
                 removeList.add(p);
         }
-        removePellets(removeList);
+        remove(removeList);
         
         //NO! This modifies the iterator while it is being used. Results in a ConcurrentModificationException
         /*
@@ -264,7 +275,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             */
         }
         
-        public static Color colorOf(Type t) {
+        public static Color defaultColorOf(Type t) {
             Color c;
             switch (t) {
                 case NORMAL:
@@ -292,28 +303,84 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             return 1.5f;
         }
         public static float defaultRadiusOf(Type t) {
-            return 5.0f;
+            switch (t) {
+                case NORMAL:
+                    return 5f;
+                case HEALTH:
+                    return 8f;
+                case FOCUS:
+                    return 3f;
+                case SUPER:
+                    return 10f;
+                default:
+                    return 5f;
+            }
         }
         public static float defaultHealthOf(Type t) {
             switch (t) {
                 case NORMAL:
                     return 10f;
                 case HEALTH:
-                    return 30f;
+                    return 20f;
                 case FOCUS:
                     return 20f;
                 case SUPER:
-                    return 50f;
+                    return 30;
                 default:
                     return 1.f;
             }
         }
+        public static float defaultDamagePowerOf(Type t) {
+            switch (t) {
+                case NORMAL:
+                    return 15f;
+                case HEALTH:
+                    return 0f;
+                case FOCUS:
+                    return 25f;
+                case SUPER:
+                    return 50f;
+                default:
+                    return 0f;
+            }
+        }
+        public static Color defaultAbsorbColor(Type t) {
+            Color c = defaultColorOf(t);
+            return c;
+        }
         
+        public float attackPower() {
+            return defaultDamagePowerOf(type);
+        }
         public float getHealthPerc() {
             return health / defaultHealthOf(type);
         }
-        private float getRadius() {
+        public float getRadius() {
             return Math.max(Pellet.defaultRadiusOf(type)*getHealthPerc(), 1);
+        }
+        public Color absorbColor() {
+            Color c = defaultAbsorbColor(type);
+            float[] cHSB;
+            cHSB = Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null);
+            int cRGB;
+            
+            float perc = getHealthPerc();
+            cRGB = Color.HSBtoRGB(cHSB[0], cHSB[1]*(1-(0.5f*perc)), cHSB[2]*(1f-(0.4f*perc)));
+            
+            return new Color(cRGB);
+        }
+        public float absorbLineWidth() {
+            switch(type) {
+                case NORMAL:
+                    return 2f;
+                case HEALTH:
+                case FOCUS:
+                    return 3.5f;
+                case SUPER:
+                    return 5f;
+                default:
+                    return 1f;
+            }
         }
         
         public void damage(float amount) {
@@ -327,7 +394,6 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             health = Math.min(health + amount, defaultHealthOf(type));
         }
         
-        /*This is made protected because the 'draw' method should not be called without first preparing to draw it (i.e. by changing stroke type and whatnot)*/
         @Override
         public void draw() {
             
@@ -338,7 +404,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         public void prepareDraw() {
             
             GLDrawHelper.setStrokeWidth(Pellet.strokeWeightOf(type));
-            GLDrawHelper.setColor(Pellet.colorOf(type));
+            GLDrawHelper.setColor(Pellet.defaultColorOf(type));
         }
         
         protected Pellet(Type t, CVector posIn, CVector velIn) {

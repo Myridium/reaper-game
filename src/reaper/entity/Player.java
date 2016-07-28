@@ -21,6 +21,8 @@ public class Player implements IEntity<Player> {
     private CVector vel;
     
     private float capturePower;
+    private float health;
+    private float maxHealth;
     
     //These first two determine the maximum focii separation
     private float collideRadius;
@@ -45,6 +47,8 @@ public class Player implements IEntity<Player> {
         refreshMaxFociiSeparation();
         refreshFociiDistance();
         refreshRadii();
+        maxHealth = 100;
+        health = 100;
         
         capturePower = 5f;
     }
@@ -77,13 +81,23 @@ public class Player implements IEntity<Player> {
     public void shrink(float amount) {
         setCollideRadius(
                 Math.min(
-                        Math.max(5, collideRadius-amount)
+                        Math.max(15, collideRadius-amount)
                 ,
                 captureEffectiveRadius)
         );
     }
     public void grow(float amount) {
         shrink(-amount);
+    }
+    public void heal(float amount) {
+        // Health is from 0 to 100
+        health = Math.max(
+                0,
+                Math.min(health + amount, maxHealth)
+        );
+    }
+    public void damage(float amount) {
+        heal(-amount);
     }
     
     private void refreshFociiDistance() {
@@ -151,15 +165,25 @@ public class Player implements IEntity<Player> {
     }
     @Override
     public void prepareDraw() {
-        GLDrawHelper.setColor(1, 0, 0);
-        GLDrawHelper.setStrokeWidth(1);
+        // Nothing yet
     }
     @Override
     public void draw() {
         
+        if (health < maxHealth) {
+            float angle = 2f * (float)Math.PI * (health - maxHealth) / maxHealth;
+            GLDrawHelper.setColor(0.2f,0.2f,0.1f);
+            GLDrawHelper.diskSector(pos.x, pos.y, collideRadius,(float)Math.PI/2,-angle);
+        }
+        
+        GLDrawHelper.setStrokeWidth(3);
+        GLDrawHelper.setColor(1, 0, 0);
         GLDrawHelper.circle(pos.x, pos.y, collideRadius);
+        
+        GLDrawHelper.setStrokeWidth(1);
         GLDrawHelper.setColor(Color.GRAY);
         CVector pv = getCaptureCenter();
+        
         float cx = pv.x, cy = pv.y;
         GLDrawHelper.ellipse(cx, cy, getCaptureMinorRadius(), getCaptureMajorRadius(), captureAngle);
         
@@ -182,6 +206,8 @@ public class Player implements IEntity<Player> {
         p.setFociiRelativeDistance(fociiSeparationRelative);
         p.captureUpperBoundSq = this.captureUpperBoundSq;
         p.capturePower = this.capturePower;
+        p.health = this.health;
+        p.maxHealth = this.maxHealth;
         
         return p;
     }
@@ -218,9 +244,9 @@ public class Player implements IEntity<Player> {
         relY = relY;
         return (Math.pow(relY/getCaptureMinorRadius(),2) + Math.pow(relX/getCaptureMajorRadius(),2) <= 1);
     }
-    public boolean isColliding(float x, float y) {
+    public float distanceFrom(float x, float y) {
         float relX = x - pos.x;
         float relY = y - pos.y;
-        return ((relX*relX) + (relY*relY)) <= (collideRadius*collideRadius);
+        return ((float)Math.sqrt((relX*relX) + (relY*relY)) - (float)Math.sqrt(collideRadius*collideRadius));
     }
 }

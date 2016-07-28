@@ -55,21 +55,27 @@ public class GLDrawHelper {
         line(startX,startY,endX,endY);
     }
     public static void disk(float x, float y, float radius) {
-        ellipseFill(x,y,radius,radius,0);
+        diskSector(x,y,radius,0,(float)TAU);
+    }
+    public static void diskSector(float x, float y, float radius, float sectorStartAngle, float sectorAngle) {
+        ellipseFillSector(x,y,radius,radius,0,sectorStartAngle,sectorAngle);
     }
     public static void circle(float x, float y, float radius) {
         ellipse(x,y,radius,radius,0);
     }
     public static void ellipseFill(float x, float y, float mrad, float Mrad, float angle) {
+        ellipseFillSector(x,y,mrad,Mrad,angle,0,(float)TAU);
+    }
+    public static void ellipseFillSector(float x, float y, float mrad, float Mrad, float angle, float sectorStartAngle, float sectorAngle) {
        
-        int sliceCount = (int)Math.ceil(ELLIPSE_ACCURACY*Mrad);
+        int sliceCount = (int)Math.ceil(ELLIPSE_ACCURACY*Mrad*sectorAngle/TAU);
         double cache,relX,relY;
 
         glBegin(GL_TRIANGLE_FAN);
             glVertex2d(x, y); // center of circle
             for(int i = 0; i <= sliceCount ; i++) { 
-                cache = Mrad*Math.cos(i * TAU / sliceCount);
-                relY = mrad*Math.sin(i * TAU / sliceCount);
+                cache = Mrad*Math.cos(i * sectorAngle / sliceCount + sectorStartAngle);
+                relY = mrad*Math.sin(i * sectorAngle / sliceCount + sectorStartAngle);
                 relX = (Math.cos(-angle)*cache) + (Math.sin(-angle)*relY);
                 relY = (-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY);
                 
