@@ -18,7 +18,7 @@ public class GLDrawHelper {
     private static final double TAU = 2.0d * Math.PI;
     
     //Number of segments per pixel size of the major axis
-    private static final float ELLIPSE_ACCURACY = 1.8f;
+    private static final float ELLIPSE_ACCURACY = 2f;
     
     /*
     public static void writeText(float x, float y, String str, Color c) {
@@ -63,12 +63,15 @@ public class GLDrawHelper {
     public static void circle(float x, float y, float radius) {
         ellipse(x,y,radius,radius,0);
     }
+    public static void circleSector(float x, float y, float radius, float sectorStartAngle, float sectorAngle) {
+        ellipseSector(x,y,radius,radius,0,sectorStartAngle,sectorAngle);
+    }
     public static void ellipseFill(float x, float y, float mrad, float Mrad, float angle) {
         ellipseFillSector(x,y,mrad,Mrad,angle,0,(float)TAU);
     }
     public static void ellipseFillSector(float x, float y, float mrad, float Mrad, float angle, float sectorStartAngle, float sectorAngle) {
        
-        int sliceCount = (int)Math.ceil(ELLIPSE_ACCURACY*Mrad*sectorAngle/TAU);
+        int sliceCount = (int)Math.ceil(ELLIPSE_ACCURACY*Mrad*Math.abs(sectorAngle)/TAU);
         double cache,relX,relY;
 
         glBegin(GL_TRIANGLE_FAN);
@@ -104,6 +107,44 @@ public class GLDrawHelper {
                 );
             }
         glEnd();
-   }
+    }
+    public static void ellipseSector(float x, float y, float mrad, float Mrad, float angle, float sectorStartAngle, float sectorAngle) {
+        int sliceCount = (int)Math.ceil(ELLIPSE_ACCURACY*Mrad*Math.abs(sectorAngle)/TAU);
+        double cache,relX,relY;
+
+        glBegin(GL_LINE_STRIP);
+            for(int i = 0; i <= sliceCount ; i++) { 
+                cache = Mrad*Math.cos(i * sectorAngle / sliceCount + sectorStartAngle);
+                relY = mrad*Math.sin(i * sectorAngle / sliceCount + sectorStartAngle);
+                relX = (Math.cos(-angle)*cache) + (Math.sin(-angle)*relY);
+                relY = (-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY);
+                
+                glVertex2d(
+                    x + relX,
+                    y + relY
+                );
+            }
+        glEnd();
+    }
+    public static void urchin(float x, float y, float sRad, float bRad, int spines, float angle) {
+        
+        int sliceCount = spines*2;
+        double cache,relX,relY;
+
+        glBegin(GL_LINE_LOOP);
+            for(int i = 0; i <= sliceCount ; i++) {
+                float rad = ((bRad - sRad)*(i % 2)) + sRad;
+                cache = rad *Math.cos(i * TAU / sliceCount);
+                relY =  rad *Math.sin(i * TAU / sliceCount);
+                relX =  (Math.cos(-angle)*cache) + (Math.sin(-angle)*relY);
+                relY =  (-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY);
+                
+                glVertex2d(
+                    x + relX,
+                    y + relY
+                );
+            }
+        glEnd();
+    }
     
 }

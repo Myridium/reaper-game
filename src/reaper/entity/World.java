@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import reaper.CVector;
 import reaper.GLDrawHelper;
 
 /**
@@ -36,7 +37,7 @@ public final class World implements IDrawable, IEvolvable<World> {
         pc.setSpawnCenter(width/2, height/2);
         pc.setSpawnFreq(10, 100);
         pc.setSpawnRadius(Math.max(width, height));
-        pc.setSpawnVelMag(10,100);
+        pc.setSpawnVelMag(10,300);
         pc.setAutoSpawn(true);
         
         addEntity(player);
@@ -53,16 +54,36 @@ public final class World implements IDrawable, IEvolvable<World> {
         // World-dependent evolution/physics goes here//////////////////////////
         float secondsElapsed = timestep/(1000f*1000f*1000f);
         
+        CVector playerVect = player.getXY();
+        
         // This is called both here and in drawAuxilliaries.
         // It's a bit inefficient, but not a bottleneck. I've left it for now.
         List<PelletCollection.Pellet> endP = pc.getEndangeredPellets(player);
         
         List<PelletCollection.Pellet> allP = pc.getPellets();
         for (PelletCollection.Pellet p : allP) {
+            
+            float distFromPlayer = player.distanceFrom(p.getX(), p.getY()) - p.getRadius();
+            
+            if (p.type == PelletCollection.Pellet.Type.HOMING) {
+                // The homing pellet's velocity should be updated
+                // The homing pellet has a single evolve parameter which is the closest distance
+                // it has ever been to the player.
+                p.setParam(0, Math.min(distFromPlayer,p.getParam(0)));
+                
+                float accValue = p.getParam(0);
+                accValue = accValue*(float)Math.pow(distFromPlayer,1) * (float)Math.exp(-distFromPlayer/50f);
+                
+                CVector dir = CVector.normVector(p.getXY(), playerVect).multiply(accValue*secondsElapsed);
+                p.addVel(dir);
+                
+            }
             // At the moment, this could just be done for pellets that are in capture range
             // as they can't harm the player otherwise, but this could change.
-            if (player.distanceFrom(p.getX(), p.getY()) < p.getRadius())
+            if (distFromPlayer < 0)
                 player.damage(secondsElapsed*p.attackPower());
+            
+            
             
             if (endP.contains(p)) {
                 //Health drop rate of 5 per second
@@ -71,7 +92,18 @@ public final class World implements IDrawable, IEvolvable<World> {
                 //The PelletCollection will prune dead pellets when it is evolved.
                 //Before that happens, we'll check if the pellet is dead and if so, add health to the player.
                 if (p.isDead()) {
-                    player.shrink(6f);
+                    switch (p.type) {
+                        case HEALTH:
+                            player.heal(20f);
+                            break;
+                        case FOCUS:
+                            player.addFocus(20f);
+                            break;
+                        default:
+                            player.addFocus(2f);
+                            player.shrink(6f);
+                            break;
+                    }
                 }
             } else {
                 //Automatic health regeneration

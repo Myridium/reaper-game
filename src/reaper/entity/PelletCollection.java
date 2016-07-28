@@ -150,7 +150,10 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         CVector vvSpawn = new CVector(vxSpawn,vySpawn);
         Pellet.Type type = randPelletType();
         
-        Pellet p = new Pellet(type,xySpawn,vvSpawn);
+        float rotAngle = 0;
+        float rotVel = (float)(Math.random()*Math.PI);
+        
+        Pellet p = new Pellet(type,xySpawn,vvSpawn,rotAngle,rotVel);
         this.addPellet(p);
     }
     
@@ -162,6 +165,8 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             return Pellet.Type.HEALTH;
         if (rand < 0.98)
             return Pellet.Type.FOCUS;
+        if (rand < 0.99)
+            return Pellet.Type.HOMING;
         return Pellet.Type.SUPER;
     }
     private void remove(Pellet p) {
@@ -209,7 +214,6 @@ public final class PelletCollection implements IEntity<PelletCollection> {
     public float getX() {
         return -1;
     }
-
     @Override
     public float getY() {
         return -1;
@@ -221,6 +225,9 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         CVector vel; //Velocity in pixels per second.
         Type type;
         float health; 
+        float rotAngle;
+        float rotVel;
+        float[] evolveParams;
 
         @Override
         public int getLayer() {
@@ -234,12 +241,26 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             pos.x += secondsPassed * vel.x;
             pos.y += secondsPassed * vel.y;
             
+            // The homing pellet homes!
+            // This is handled by the World physics though.
+            
+            rotAngle += secondsPassed*rotVel;
+            
         }
 
         @Override
         public Pellet deepClone() {
             Pellet p = new Pellet(type, pos, vel);
             p.health = this.health;
+            p.rotAngle = this.rotAngle;
+            p.rotVel = this.rotVel;
+            
+            //Clone the evolveParams array
+            float[] params = new float[this.evolveParams.length];
+            for (int i=0; i < params.length; i++) {
+                params[i] = this.evolveParams[i];
+            }
+            p.evolveParams = params;
             return p;
         }
 
@@ -262,7 +283,8 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             NORMAL,
             HEALTH,
             FOCUS,
-            SUPER;
+            SUPER,
+            HOMING;
             
             /*
             public Type deepClone() {
@@ -290,8 +312,11 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                 case SUPER:
                     c = new Color(0xFFD86DB1,true);
                     break;
-                default:
+                case HOMING:
                     c = Color.RED;
+                    break;
+                default:
+                    c = Color.DARK_GRAY;
             }
             
             /*Color.getRGB() actually returns ARGB*/
@@ -312,6 +337,8 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                     return 3f;
                 case SUPER:
                     return 10f;
+                case HOMING:
+                    return 16f;
                 default:
                     return 5f;
             }
@@ -326,6 +353,8 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                     return 20f;
                 case SUPER:
                     return 30;
+                case HOMING:
+                    return 5f;
                 default:
                     return 1.f;
             }
@@ -335,11 +364,13 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                 case NORMAL:
                     return 15f;
                 case HEALTH:
-                    return 0f;
+                    return 5f;
                 case FOCUS:
                     return 25f;
                 case SUPER:
                     return 50f;
+                case HOMING:
+                    return 75f;
                 default:
                     return 0f;
             }
@@ -347,6 +378,21 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         public static Color defaultAbsorbColor(Type t) {
             Color c = defaultColorOf(t);
             return c;
+        }
+        public static float[] getDefaultParamArray(Type t) {
+            if (t == Type.HOMING) {
+                float[] fa = new float[1];
+                fa[0] = 3000f;
+                return fa;
+            }
+            return new float[0];
+        }
+        
+        public void setParam(int i, float value) {
+            evolveParams[i] = value;
+        }
+        public float getParam(int i) {
+            return evolveParams[i];
         }
         
         public float attackPower() {
@@ -378,6 +424,8 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                     return 3.5f;
                 case SUPER:
                     return 5f;
+                case HOMING:
+                    return 2f;
                 default:
                     return 1f;
             }
@@ -394,9 +442,19 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             health = Math.min(health + amount, defaultHealthOf(type));
         }
         
+        public void addVel(CVector vect) {
+            vel = vel.add(vect);
+        }
+        
         @Override
         public void draw() {
             
+            if (type == Type.HOMING) {
+                float rad = getRadius();
+                GLDrawHelper.urchin(pos.x, pos.y, rad*0.75f, rad, 10, rotAngle);
+                return;
+            }
+                
             GLDrawHelper.circle(pos.x, pos.y, getRadius());
             
         }
@@ -408,10 +466,16 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         }
         
         protected Pellet(Type t, CVector posIn, CVector velIn) {
+            this(t,posIn,velIn,0f,0f);
+        }
+        protected Pellet(Type t, CVector posIn, CVector velIn, float initRotationAngle, float initRotationSpeed) {
             type = t;
             pos = new CVector(posIn.x,posIn.y);
             vel = new CVector(velIn.x,velIn.y);    
             health = defaultHealthOf(t);
+            rotAngle = initRotationAngle;
+            rotVel = initRotationSpeed;
+            evolveParams = Pellet.getDefaultParamArray(t);
         }
         
         public boolean isDead() {

@@ -16,6 +16,7 @@ import reaper.GLDrawHelper;
 public class Player implements IEntity<Player> {
 
     private static final int LAYER = 10;
+    private static final float minCollideRadius = 15f;
     
     private CVector pos;
     private CVector vel;
@@ -23,6 +24,8 @@ public class Player implements IEntity<Player> {
     private float capturePower;
     private float health;
     private float maxHealth;
+    private float focus;
+    private float maxFocus;
     
     //These first two determine the maximum focii separation
     private float collideRadius;
@@ -40,7 +43,7 @@ public class Player implements IEntity<Player> {
     protected Player(float x, float y) {
         pos = new CVector(x,y);
         vel = new CVector(0,0);
-        collideRadius = 30;
+        collideRadius = minCollideRadius;
         captureEffectiveRadius = 150;
         fociiSeparationRelative = 0;        
         captureAngle=(float)Math.PI/8f;
@@ -49,6 +52,8 @@ public class Player implements IEntity<Player> {
         refreshRadii();
         maxHealth = 100;
         health = 100;
+        focus = 0;
+        maxFocus = 100;
         
         capturePower = 5f;
     }
@@ -81,7 +86,7 @@ public class Player implements IEntity<Player> {
     public void shrink(float amount) {
         setCollideRadius(
                 Math.min(
-                        Math.max(15, collideRadius-amount)
+                        Math.max(minCollideRadius, collideRadius-amount)
                 ,
                 captureEffectiveRadius)
         );
@@ -98,6 +103,11 @@ public class Player implements IEntity<Player> {
     }
     public void damage(float amount) {
         heal(-amount);
+    }
+    public void addFocus(float amount) {
+        focus = Math.max(0, 
+                Math.min(amount + focus, maxFocus)
+        );
     }
     
     private void refreshFociiDistance() {
@@ -170,14 +180,14 @@ public class Player implements IEntity<Player> {
     @Override
     public void draw() {
         
-        if (health < maxHealth) {
-            float angle = 2f * (float)Math.PI * (health - maxHealth) / maxHealth;
-            GLDrawHelper.setColor(0.2f,0.2f,0.1f);
-            GLDrawHelper.diskSector(pos.x, pos.y, collideRadius,(float)Math.PI/2,-angle);
+        GLDrawHelper.setColor(1, 0.5f, 0);
+        
+        if (true) {
+            float angle = 2f * (float)Math.PI * (health / maxHealth);
+            GLDrawHelper.diskSector(pos.x, pos.y, collideRadius+1,(float)Math.PI/2,-angle);
         }
         
         GLDrawHelper.setStrokeWidth(3);
-        GLDrawHelper.setColor(1, 0, 0);
         GLDrawHelper.circle(pos.x, pos.y, collideRadius);
         
         GLDrawHelper.setStrokeWidth(1);
@@ -187,6 +197,12 @@ public class Player implements IEntity<Player> {
         float cx = pv.x, cy = pv.y;
         GLDrawHelper.ellipse(cx, cy, getCaptureMinorRadius(), getCaptureMajorRadius(), captureAngle);
         
+        if (focus > 0) {
+            float angle = 2f * (float)Math.PI * (focus / maxFocus);
+            GLDrawHelper.setColor(0.4f, 0.4f, 1f,1f);
+            GLDrawHelper.setStrokeWidth(5);
+            GLDrawHelper.circleSector(pos.x, pos.y, collideRadius, (float)Math.PI/2, -angle);
+        }
     }
     
     // From implementing IEvolvable
@@ -208,6 +224,8 @@ public class Player implements IEntity<Player> {
         p.capturePower = this.capturePower;
         p.health = this.health;
         p.maxHealth = this.maxHealth;
+        p.focus = this.focus;
+        p.maxFocus = this.maxFocus;
         
         return p;
     }
