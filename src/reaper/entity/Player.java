@@ -35,13 +35,6 @@ public class Player implements IEntity<Player> {
     private float fociiSeparationRelative;
     private float captureAngle;
     
-    //These variables are calculated from the others.
-    private float maxFociiSeparation;
-    private float captureFociiSeparation;
-    private float captureMajorRadius;
-    private float captureMinorRadius;
-    private float captureUpperBoundSq;
-    
     protected Player(float x, float y) {
         pos = new CVector(x,y);
         vel = new CVector(0,0);
@@ -49,9 +42,6 @@ public class Player implements IEntity<Player> {
         captureEffectiveRadius = 150;
         fociiSeparationRelative = 0;        
         captureAngle=(float)Math.PI/8f;
-        refreshMaxFociiSeparation();
-        refreshFociiDistance();
-        refreshRadii();
         maxHealth = 100;
         health = 100;
         focus = 0;
@@ -62,20 +52,15 @@ public class Player implements IEntity<Player> {
     
     public void setEffectiveCaptureRadius(float rad) {
         captureEffectiveRadius = rad;
-        refreshMaxFociiSeparation();
-        refreshFociiDistance();
-        refreshRadii();
     }
     public void setCollideRadius(float rad) {
         collideRadius = rad;
-        refreshMaxFociiSeparation();
-        refreshFociiDistance();
-        refreshRadii();
+    }
+    public float getCollideRadius() {
+        return collideRadius;
     }
     public void setFociiRelativeDistance(float rel) {
         fociiSeparationRelative = rel;
-        refreshFociiDistance();
-        refreshRadii();
     }
     public void setCaptureAngle(float angle) {
         captureAngle = angle;
@@ -112,11 +97,14 @@ public class Player implements IEntity<Player> {
         );
     }
     
-    private void refreshFociiDistance() {
-        captureFociiSeparation = maxFociiSeparation*fociiSeparationRelative;
+    public float getCaptureEffectiveRadius() {
+        return captureEffectiveRadius + captureBoost;
     }
-    private void refreshMaxFociiSeparation() {
-        double r = captureEffectiveRadius;
+    public float getFociiDistance() {
+        return getMaxFociiSeparation()*fociiSeparationRelative;
+    }
+    public float getMaxFociiSeparation() {
+        double r = getCaptureEffectiveRadius();
         double R = collideRadius;
         double r4 = Math.pow(r, 4);
         double R2 = Math.pow(R, 2);
@@ -126,21 +114,26 @@ public class Player implements IEntity<Player> {
                 )
                 ;
         cache = Math.pow(cache, 1d/3d);
-        maxFociiSeparation = 
+        float mfs = 
                 (float)
                 (
                 ((-5d*R) + (R*R*R/cache) + (cache/R))/3d
                 );
-        
+        return mfs;
     }
-    private void refreshRadii() {
-        captureMajorRadius = (float)Math.sqrt(
-                (Math.pow(captureFociiSeparation/2d, 2)+Math.sqrt(Math.pow(captureFociiSeparation/2d, 4) + (4*Math.pow(captureEffectiveRadius, 4))))/2d
+    public float getCaptureMajorRadius() {
+        return (float)Math.sqrt(
+                (Math.pow(getFociiDistance()/2d, 2)+Math.sqrt(Math.pow(getFociiDistance()/2d, 4) + (4*Math.pow(getCaptureEffectiveRadius(), 4))))/2d
         );
-        captureMinorRadius = (float)Math.sqrt(
-                (0d-Math.pow(captureFociiSeparation/2d, 2)+Math.sqrt(Math.pow(captureFociiSeparation/2d, 4) + (4*Math.pow(captureEffectiveRadius, 4))))/2d
+    }
+    public float getCaptureMinorRadius() {
+        return (float)Math.sqrt(
+                (0d-Math.pow(getFociiDistance()/2d, 2)+Math.sqrt(Math.pow(getFociiDistance()/2d, 4) + (4*Math.pow(getCaptureEffectiveRadius(), 4))))/2d
         );
-        captureUpperBoundSq = (float)Math.pow(2*captureMajorRadius-collideRadius, 2);
+    }
+    //This method should be QUICK. It will just give a rough upper bound.
+    public float getCaptureUpperBoundSq() {
+        return (float)Math.pow(2f*getCaptureMajorRadius() - getCollideRadius(),2);
     }
     
     public float getCapturePower() {
@@ -149,20 +142,11 @@ public class Player implements IEntity<Player> {
     public float getEffectiveRadius() {
         return captureEffectiveRadius;
     }
-    public float getFociiSeparation() {
-        return captureFociiSeparation;
-    }
-    public float getCaptureMajorRadius() {
-        return captureMajorRadius;
-    }
-    public float getCaptureMinorRadius() {    
-        return captureMinorRadius;
-    }
     public CVector getCaptureCenter() {
         //The collision circle is centered on one of the focii.
         CVector pv;
         
-        float cx = pos.x, cy = pos.y, fsOn2 = getFociiSeparation()/2;
+        float cx = pos.x, cy = pos.y, fsOn2 = getFociiDistance()/2;
         cx += fsOn2*Math.cos(captureAngle);
         cy += fsOn2*Math.sin(captureAngle);
         
@@ -222,7 +206,6 @@ public class Player implements IEntity<Player> {
         p.setCollideRadius(collideRadius);
         p.setEffectiveCaptureRadius(captureEffectiveRadius);
         p.setFociiRelativeDistance(fociiSeparationRelative);
-        p.captureUpperBoundSq = this.captureUpperBoundSq;
         p.capturePower = this.capturePower;
         p.health = this.health;
         p.maxHealth = this.maxHealth;
@@ -252,7 +235,7 @@ public class Player implements IEntity<Player> {
         
         //Quickly answer no if it's obvious
         float dist2 = (float)(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y,2));
-        if (dist2 > captureUpperBoundSq)
+        if (dist2 > getCaptureUpperBoundSq())
             return false;
         
         CVector captureCenter = getCaptureCenter();
