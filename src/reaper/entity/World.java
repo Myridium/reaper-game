@@ -97,11 +97,11 @@ public final class World implements IDrawable, IEvolvable<World> {
                             player.heal(20f);
                             break;
                         case FOCUS:
-                            player.addFocus(20f);
+                            player.addFocus(180f);
                             break;
                         default:
-                            player.addFocus(2f);
-                            player.shrink(6f);
+                            player.addFocus(15f);
+                            player.shrink(4f);
                             break;
                     }
                 }

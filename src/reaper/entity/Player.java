@@ -51,11 +51,11 @@ public class Player implements IEntity<Player> {
         maxHealth = 100;
         health = 100;
         focus = 0;
-        maxFocus = 100;
+        maxFocus = 1000;
         
         refreshCachedVariables();
         
-        capturePower = 5f;
+        capturePower = 6f;
     }
     
     private void refreshCachedVariables() {
@@ -118,7 +118,7 @@ public class Player implements IEntity<Player> {
     }
     
     private float boostMultiplier() {
-        return (float)(1 - Math.exp(-2f*focus/maxFocus));
+        return (float)(1 - Math.exp(-5f*focus/maxFocus));
     }
     public float getCaptureEffectiveRadius() {
         // The capture boost only takes effect if the player has remaining focus.
@@ -238,6 +238,8 @@ public class Player implements IEntity<Player> {
         float secondsElapsed = nanoTimestep/(1000f*1000f*1000f);
         pos.x += vel.x * secondsElapsed;
         pos.y += vel.y * secondsElapsed;
+        addFocus(-secondsElapsed*captureBoost);
+        
         refreshCachedVariables();
     }
     @Override

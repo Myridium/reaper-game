@@ -99,6 +99,8 @@ public final class ControllerReader {
                 throw new NoSuchAxisException();
         }
         value = (value*1.2f+1f)/2f;
+        value = Math.max(0, value);
+        value = Math.min(1, value);
         return new TriggerFilteredState(value);
     }
     
