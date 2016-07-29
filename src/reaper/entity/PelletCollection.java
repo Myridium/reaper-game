@@ -364,15 +364,15 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         public static float defaultDamagePowerOf(Type t) {
             switch (t) {
                 case NORMAL:
-                    return 15f;
+                    return 30f;
                 case HEALTH:
-                    return 5f;
+                    return 15f;
                 case FOCUS:
-                    return 25f;
-                case SUPER:
                     return 50f;
-                case HOMING:
+                case SUPER:
                     return 75f;
+                case HOMING:
+                    return 100f;
                 default:
                     return 0f;
             }

@@ -9,6 +9,8 @@ import java.nio.FloatBuffer;
 import static org.lwjgl.glfw.GLFW.*;
 import reaper.entity.Player;
 import reaper.entity.World;
+import reaper.input.ControllerReader;
+import reaper.input.ControllerReader.JoystickFilteredState;
 
 /**
  *
@@ -18,6 +20,7 @@ public class ReaperFrameLooper {
     
     final long dt = 1000*1000*1000 / 1000;
     final long MAX_FRAME_TIME = (1000*1000*1000) / 10;
+    ControllerReader cr;
     
     long currentTime;
     long accumulator;
@@ -27,15 +30,7 @@ public class ReaperFrameLooper {
     
     int framesToNextPellet;
     
-    public class NoControllerException extends Exception {
-        
-        public NoControllerException(String msg) {
-            super(msg);
-        }
-        public NoControllerException() {
-            super();
-        }
-    }
+    
     
     public void init(int width, int height) {
      
@@ -45,53 +40,32 @@ public class ReaperFrameLooper {
         currentTime = System.nanoTime();
         accumulator = 0;
         
+        cr = new ControllerReader(ControllerReader.ControllerID.ONE);
+        
     }
     
-    public void frame() throws NoControllerException {
+    public void frame() throws ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException {
         long elapsedTime = 0 - (currentTime) + (currentTime = System.nanoTime());
         /*In case the simulation can't keep up with the frame advancement, we should put an upper limit on how much the physics will advance per frame*/
         elapsedTime = Math.min(elapsedTime, MAX_FRAME_TIME);
         accumulator += elapsedTime;
         
-        /*Handle player input here*/
+        ///////////////////////*Handle player input here*///////////////////////
+        JoystickFilteredState js;
+        js = cr.getJoystickState(ControllerReader.Joystick.LEFT);
         
-        //Through testing I have determined that on my XBOX 360 controller:
-        //Axis 0 is the left stick x axis. Left = -1, Right  = 1
-        //Axis 1 is the left stick y axis. Top  = -1, Bottom = 1
-        //Axis 2 is the left trigger.      Untouched = -1, Fully pressed = 1
-        //Axis 3 is the right stick x axis. Left = -1, Right  = 1
-        //Axis 4 is the right stick y axis. Top = -1, Bottom = 1
-        //Axis 5 is the right trigger.     Untouched = -1, Fully pressed = 1
-        //Axis 6 - unused
-        //Axis 7 - unused
+        float mag = js.getMag();
+        float angle = js.getAngle();
         
-        //glfwPollEvents();
-        FloatBuffer fb = glfwGetJoystickAxes(GLFW_JOYSTICK_1);
-        if (fb == null) {
-            // Could not find the gamepad joystick
-            System.err.println("Could not find any joystick axes of the first controller.");
-            System.out.println("Aborting.");
-            throw new NoControllerException();
-        }
+        mag*=800;
+        player.setVelocity(mag*(float)Math.cos(angle),mag*(float)Math.sin(-angle));
         
-        //Need a deadzone, etc
-        float xstick, ystick, mag, angle;
-        xstick = fb.get(0);
-        ystick = -fb.get(1);
         
-        mag = (float)Math.sqrt((xstick*xstick) + (ystick*ystick));
-        mag = (float)Math.min(Math.max(mag-0.3, 0),0.6);
-        angle = (float)Math.atan2(ystick, xstick);
-        mag*=1000;
-        player.setVelocity(mag*(float)Math.cos(angle),mag*(float)Math.sin(angle));
-        
-        xstick = fb.get(3);
-        ystick = fb.get(4);
-        mag = (float)Math.sqrt((xstick*xstick) + (ystick*ystick));
-        mag = (float)Math.min(Math.max(mag-0.3, 0)*1.6,1);
-        angle = (float)Math.atan2(-ystick, xstick);
+        js = cr.getJoystickState(ControllerReader.Joystick.RIGHT);
+        mag = js.getMag();
+        angle = js.getAngle();
         player.setFociiRelativeDistance(mag);
-        player.setCaptureAngle(angle);
+        player.setCaptureAngle(-angle);
         
         
         

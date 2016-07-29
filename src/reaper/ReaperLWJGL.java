@@ -12,6 +12,7 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
+import reaper.input.ControllerReader;
 
 
 /**
@@ -29,7 +30,7 @@ public class ReaperLWJGL {
     
     private ReaperFrameLooper reaperFrameLoop;
     
-    public void run() throws InterruptedException {
+    public void run() throws InterruptedException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException {
         System.out.println("LWJGL Version: " + Version.getVersion());
         
         try {
@@ -39,9 +40,7 @@ public class ReaperLWJGL {
             //Free the window callbacks and destroy the window
             glfwFreeCallbacks(gameWindow);
             glfwDestroyWindow(gameWindow);
-        } catch (ReaperFrameLooper.NoControllerException e) {
-            return;
-        } finally {
+        }  finally {
             glfwTerminate();
             glfwSetErrorCallback(null).free();
         }
@@ -100,7 +99,7 @@ public class ReaperLWJGL {
         
     }
     
-    public void loop() throws InterruptedException, ReaperFrameLooper.NoControllerException {
+    public void loop() throws InterruptedException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException {
         
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
