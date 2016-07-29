@@ -161,13 +161,13 @@ public final class PelletCollection implements IEntity<PelletCollection> {
     
     private Pellet.Type randPelletType() {
         double rand = Math.random();
-        if (rand < 0.9)
+        if (rand < 0.85)
             return Pellet.Type.NORMAL;
-        if (rand < 0.94)
+        if (rand < 0.89)
             return Pellet.Type.HEALTH;
-        if (rand < 0.98)
+        if (rand < 0.93)
             return Pellet.Type.FOCUS;
-        if (rand < 0.99)
+        if (rand < 0.995)
             return Pellet.Type.HOMING;
         return Pellet.Type.SUPER;
     }

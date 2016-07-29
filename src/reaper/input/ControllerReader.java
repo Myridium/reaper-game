@@ -55,7 +55,6 @@ public final class ControllerReader {
             throw new NoControllerException();
         }
         
-        //Need a deadzone, etc
         float xstick, ystick, mag, angle;
         
         switch (js) {
@@ -72,17 +71,56 @@ public final class ControllerReader {
         }
         
         mag = (float)Math.sqrt((xstick*xstick) + (ystick*ystick));
+        //Need a deadzone, etc
         mag = (float)Math.min(Math.max(mag-0.3, 0),0.65)/0.65f;
         angle = (float)Math.atan2(ystick, xstick);
         
         return new JoystickFilteredState(mag,angle);
+    }
+    public TriggerFilteredState getTriggerState(Trigger t) throws NoSuchAxisException, NoControllerException {
+        FloatBuffer fb = glfwGetJoystickAxes(controllerID);
+        if (fb == null) {
+            // Could not find the gamepad joystick
+            System.err.println("Could not find any joystick axes of the first controller.");
+            System.out.println("Aborting.");
+            throw new NoControllerException();
+        }
+        
+        float value;
+        
+        switch (t) {
+            case LEFT:
+                value = fb.get(2);
+                break;
+            case RIGHT:
+                value = fb.get(5);
+                break;
+            default:
+                throw new NoSuchAxisException();
+        }
+        value = (value*1.2f+1f)/2f;
+        return new TriggerFilteredState(value);
     }
     
     public enum Joystick {
         LEFT,
         RIGHT;
     }
+    public enum Trigger {
+        LEFT,
+        RIGHT;
+    }
             
+    // Varies from 0 to 1
+    public final class TriggerFilteredState {
+        private float value;
+        public float getValue() {
+            return value;
+        }
+        protected TriggerFilteredState(float v) {
+            value = v;
+        }
+    }
     public final class JoystickFilteredState {
         private float mag;
         private float angle;

@@ -17,6 +17,7 @@ public class Player implements IEntity<Player> {
 
     private static final int LAYER = 10;
     private static final float minCollideRadius = 15f;
+    private static final float maxCollideRadius = 50f;
     
     private CVector pos;
     private CVector vel;
@@ -86,7 +87,7 @@ public class Player implements IEntity<Player> {
     public void shrink(float amount) {
         setCollideRadius(
                 Math.min(
-                        Math.max(minCollideRadius, collideRadius-amount)
+                        Math.max(minCollideRadius, collideRadius-(amount/collideRadius*maxCollideRadius))
                 ,
                 captureEffectiveRadius)
         );

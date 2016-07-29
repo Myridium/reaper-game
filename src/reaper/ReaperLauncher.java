@@ -8,6 +8,7 @@ package reaper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
+import reaper.input.ControllerReader;
 
 /**
  *
@@ -20,7 +21,7 @@ public class ReaperLauncher {
      * @throws java.io.IOException
      * @throws java.lang.InterruptedException
      */
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException {
+    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException {
         
         // Set the class-path for the LWJGL library stuff to the "natives/" directory
         // in the same directory as this .jar
