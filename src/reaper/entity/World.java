@@ -112,7 +112,7 @@ public final class World implements IDrawable, IEvolvable<World> {
         }
         
         //player.heal(secondsElapsed*1f);
-        player.grow(secondsElapsed*3f);
+        player.grow(secondsElapsed*2f);
         ////////////////////////////////////////////////////////////////////////
         
         // Let the entities evolve as is specified in their own classes

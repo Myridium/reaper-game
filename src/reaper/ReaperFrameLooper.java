@@ -68,7 +68,7 @@ public class ReaperFrameLooper {
         player.setCaptureAngle(-angle);
         
         float value = cr.getTriggerState(ControllerReader.Trigger.LEFT).getValue();
-        player.setEffectiveCaptureRadius(150+150*value);
+        //player.setCaptureBoost(75f*value);
         
         
         

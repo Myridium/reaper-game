@@ -27,9 +27,16 @@ public class ReaperLWJGL {
     
     private final int WIDTH = 1200;
     private final int HEIGHT = 900;
+    private final float scale = 1.2f;
     
     private ReaperFrameLooper reaperFrameLoop;
     
+    private int displayWidth() {
+        return Math.round(WIDTH*scale);
+    }
+    private int displayHeight() {
+        return Math.round(HEIGHT*scale);
+    }
     public void run() throws InterruptedException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException {
         System.out.println("LWJGL Version: " + Version.getVersion());
         
@@ -63,7 +70,7 @@ public class ReaperLWJGL {
         
         // Create the window and assign the handle to gameWindow
         // Note that the NULL object is a constant defined in the LWJGL libraries.
-        gameWindow = glfwCreateWindow(WIDTH,HEIGHT, "Reaper", NULL, NULL);
+        gameWindow = glfwCreateWindow(displayWidth(),displayHeight(), "Reaper", NULL, NULL);
         if (gameWindow == NULL)
             throw new RuntimeException("Failed to create the GLFW window!");
         
@@ -83,8 +90,8 @@ public class ReaperLWJGL {
         // Center the window
         glfwSetWindowPos(
                 gameWindow,
-                (vidmode.width() - WIDTH) / 2 + xbuff[0],
-                (vidmode.height() - HEIGHT) / 2 + ybuff[0]
+                (vidmode.width() - displayWidth()) / 2 + xbuff[0],
+                (vidmode.height() - displayHeight()) / 2 + ybuff[0]
         );
         
         // Make the OpenGL context current

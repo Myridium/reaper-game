@@ -456,6 +456,11 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                 GLDrawHelper.urchin(pos.x, pos.y, rad*0.75f, rad, 10, rotAngle);
                 return;
             }
+            if (type == Type.SUPER) {
+                float rad = getRadius();
+                GLDrawHelper.urchin(pos.x, pos.y, rad*0.5f, rad, 5, rotAngle);
+                return;
+            }
                 
             GLDrawHelper.circle(pos.x, pos.y, getRadius());
             

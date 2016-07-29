@@ -23,6 +23,7 @@ public class Player implements IEntity<Player> {
     private CVector vel;
     
     private float capturePower;
+    private float captureBoost;
     private float health;
     private float maxHealth;
     private float focus;
@@ -227,6 +228,7 @@ public class Player implements IEntity<Player> {
         p.maxHealth = this.maxHealth;
         p.focus = this.focus;
         p.maxFocus = this.maxFocus;
+        p.captureBoost = this.captureBoost;
         
         return p;
     }
