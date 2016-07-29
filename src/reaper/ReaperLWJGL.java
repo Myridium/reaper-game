@@ -127,9 +127,13 @@ public class ReaperLWJGL {
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(gameWindow) ) {
+            
+                // Putting on a frame cap (of ~120fps when this comment was made)
                 while( System.nanoTime() - currentTime < minFrameWaitNanoTime) {
                     Thread.sleep(10);
                 }
+                
+            
                 currentTime = System.nanoTime();
             
                 glClear(GL_COLOR_BUFFER_BIT); // clear the framebuffer

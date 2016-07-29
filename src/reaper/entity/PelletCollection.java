@@ -153,6 +153,8 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         float rotAngle = 0;
         float rotVel = (float)(Math.random()*Math.PI);
         
+        
+        
         Pellet p = new Pellet(type,xySpawn,vvSpawn,rotAngle,rotVel);
         this.addPellet(p);
     }
