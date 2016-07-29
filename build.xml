@@ -70,4 +70,11 @@
     nbproject/build-impl.xml file. 
 
     -->
+
+<target name="-post-jar">
+	<mkdir dir="${dist.dir}/lib/native"/>
+	<copy todir="${dist.dir}/lib/native">
+		<fileset dir="${basedir}/lwjgl/native" />
+	</copy>
+</target>
 </project>

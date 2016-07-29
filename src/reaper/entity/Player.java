@@ -263,8 +263,8 @@ public class Player implements IEntity<Player> {
         return (Math.pow(relY/getCaptureMinorRadius(),2) + Math.pow(relX/getCaptureMajorRadius(),2) <= 1);
     }
     public float distanceFrom(float x, float y) {
-        float relX = x - pos.x;
-        float relY = y - pos.y;
-        return ((float)Math.sqrt((relX*relX) + (relY*relY)) - (float)Math.sqrt(collideRadius*collideRadius));
+        float dist = CVector.dist(pos, new CVector(x,y));
+        dist = Math.max(0, dist-collideRadius);
+        return dist;
     }
 }
