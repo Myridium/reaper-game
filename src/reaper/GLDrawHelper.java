@@ -15,10 +15,10 @@ import static org.lwjgl.opengl.GL11.*;
  */
 public class GLDrawHelper {
     
-    private static final double TAU = 2.0d * Math.PI;
+    private static final double TAU = 2d * Math.PI;
     
     //Number of segments per pixel size of the major axis
-    private static final float ELLIPSE_ACCURACY = 2f;
+    private static final float ELLIPSE_ACCURACY = 1.7f;
     
     /*
     public static void writeText(float x, float y, String str, Color c) {

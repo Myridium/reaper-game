@@ -35,6 +35,12 @@ public class Player implements IEntity<Player> {
     private float fociiSeparationRelative;
     private float captureAngle;
     
+    private float cachedMajorRadius;
+    private float cachedMinorRadius;
+    private float cachedFociiSeparation;
+    private float cachedMaxFociiSeparation;
+    
+    
     protected Player(float x, float y) {
         pos = new CVector(x,y);
         vel = new CVector(0,0);
@@ -47,9 +53,20 @@ public class Player implements IEntity<Player> {
         focus = 0;
         maxFocus = 100;
         
+        refreshCachedVariables();
+        
         capturePower = 5f;
     }
     
+    private void refreshCachedVariables() {
+        
+        // The order here is important! Each relies on the last.
+        cachedMaxFociiSeparation = calculateMaxFociiSeparation();
+        cachedFociiSeparation = calculateFociiDistance();
+        cachedMajorRadius = calculateCaptureMajorRadius();
+        cachedMinorRadius = calculateCaptureMinorRadius();
+        
+    }
     public void setEffectiveCaptureRadius(float rad) {
         captureEffectiveRadius = rad;
     }
@@ -64,6 +81,9 @@ public class Player implements IEntity<Player> {
     }
     public void setCaptureAngle(float angle) {
         captureAngle = angle;
+    }
+    public void setCaptureBoost(float boost) {
+        captureBoost = boost;
     }
     
     public void setVelocity(float xvel, float yvel) {
@@ -97,13 +117,28 @@ public class Player implements IEntity<Player> {
         );
     }
     
+    private float boostMultiplier() {
+        return (float)(1 - Math.exp(-2f*focus/maxFocus));
+    }
     public float getCaptureEffectiveRadius() {
-        return captureEffectiveRadius + captureBoost;
+        // The capture boost only takes effect if the player has remaining focus.
+        // For aesthetic appeal, a low Focus will diminish the boost amount.
+        // I guess this also rewards saving up Focus and using it when the player
+        // has a lot.
+        float cb = captureBoost;
+        cb *= boostMultiplier();
+        return captureEffectiveRadius + cb;
     }
     public float getFociiDistance() {
+        return cachedFociiSeparation;
+    }
+    public float calculateFociiDistance() {
         return getMaxFociiSeparation()*fociiSeparationRelative;
     }
     public float getMaxFociiSeparation() {
+        return cachedMaxFociiSeparation;
+    }
+    public float calculateMaxFociiSeparation() {
         double r = getCaptureEffectiveRadius();
         double R = collideRadius;
         double r4 = Math.pow(r, 4);
@@ -122,11 +157,17 @@ public class Player implements IEntity<Player> {
         return mfs;
     }
     public float getCaptureMajorRadius() {
+        return cachedMajorRadius;
+    }
+    public float calculateCaptureMajorRadius() {
         return (float)Math.sqrt(
                 (Math.pow(getFociiDistance()/2d, 2)+Math.sqrt(Math.pow(getFociiDistance()/2d, 4) + (4*Math.pow(getCaptureEffectiveRadius(), 4))))/2d
         );
     }
     public float getCaptureMinorRadius() {
+        return cachedMinorRadius;
+    }
+    public float calculateCaptureMinorRadius() {
         return (float)Math.sqrt(
                 (0d-Math.pow(getFociiDistance()/2d, 2)+Math.sqrt(Math.pow(getFociiDistance()/2d, 4) + (4*Math.pow(getCaptureEffectiveRadius(), 4))))/2d
         );
@@ -197,6 +238,7 @@ public class Player implements IEntity<Player> {
         float secondsElapsed = nanoTimestep/(1000f*1000f*1000f);
         pos.x += vel.x * secondsElapsed;
         pos.y += vel.y * secondsElapsed;
+        refreshCachedVariables();
     }
     @Override
     public Player deepClone() {
@@ -212,6 +254,10 @@ public class Player implements IEntity<Player> {
         p.focus = this.focus;
         p.maxFocus = this.maxFocus;
         p.captureBoost = this.captureBoost;
+        p.cachedFociiSeparation = this.cachedFociiSeparation;
+        p.cachedMajorRadius = this.cachedMajorRadius;
+        p.cachedMinorRadius = this.cachedMinorRadius;
+        p.cachedMaxFociiSeparation = this.cachedMaxFociiSeparation;
         
         return p;
     }
