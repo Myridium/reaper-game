@@ -207,25 +207,30 @@ public class Player implements IEntity<Player> {
     @Override
     public void draw() {
         
+        
+        float angle;
+        
+        
+        //Drawing the central health disk
         GLDrawHelper.setColor(1, 0.5f, 0);
+        angle = 2f * (float)Math.PI * (health / maxHealth);
+        GLDrawHelper.diskSector(pos.x, pos.y, collideRadius+1,(float)Math.PI/2,-angle);
         
-        if (true) {
-            float angle = 2f * (float)Math.PI * (health / maxHealth);
-            GLDrawHelper.diskSector(pos.x, pos.y, collideRadius+1,(float)Math.PI/2,-angle);
-        }
-        
+        //Drawing the central disk outline (its circle)
         GLDrawHelper.setStrokeWidth(3);
         GLDrawHelper.circle(pos.x, pos.y, collideRadius);
         
+        //Drawing the capture ellipse
         GLDrawHelper.setStrokeWidth(1);
-        GLDrawHelper.setColor(Color.GRAY);
+        float extraBlue = 0.3f*boostMultiplier()*captureBoost/capturePower;
+        GLDrawHelper.setColor(0.3f,0.3f,0.3f+extraBlue);
         CVector pv = getCaptureCenter();
-        
         float cx = pv.x, cy = pv.y;
         GLDrawHelper.ellipse(cx, cy, getCaptureMinorRadius(), getCaptureMajorRadius(), captureAngle);
         
+        //Drawing the Focus meter
         if (focus > 0) {
-            float angle = 2f * (float)Math.PI * (focus / maxFocus);
+            angle = 2f * (float)Math.PI * (focus / maxFocus);
             GLDrawHelper.setColor(0.4f, 0.4f, 1f,1f);
             GLDrawHelper.setStrokeWidth(5);
             GLDrawHelper.circleSector(pos.x, pos.y, collideRadius, (float)Math.PI/2, -angle);
