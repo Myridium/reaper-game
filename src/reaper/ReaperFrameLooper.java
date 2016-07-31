@@ -5,8 +5,6 @@
  */
 package reaper;
 
-import java.nio.FloatBuffer;
-import static org.lwjgl.glfw.GLFW.*;
 import reaper.entity.Player;
 import reaper.entity.World;
 import reaper.input.ControllerReader;
