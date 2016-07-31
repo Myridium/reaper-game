@@ -58,9 +58,8 @@ public final class World implements IDrawable, IEvolvable<World> {
         
         // This is called both here and in drawAuxilliaries.
         // It's a bit inefficient, but not a bottleneck. I've left it for now.
-        List<PelletCollection.Pellet> endP = pc.getEndangeredPellets(player);
         
-        List<PelletCollection.Pellet> allP = pc.getPellets();
+        PelletCollection.Pellet[] allP = pc.getPelletsArray();
         for (PelletCollection.Pellet p : allP) {
             
             float distFromPlayer = player.distanceFrom(p.getX(), p.getY()) - p.getRadius();
@@ -85,7 +84,7 @@ public final class World implements IDrawable, IEvolvable<World> {
             
             
             
-            if (endP.contains(p)) {
+            if (pc.isPelletEndangered(p, player)) {
                 //Health drop rate of 5 per second
                 p.damage(secondsElapsed*player.getCapturePower());
                 
@@ -99,6 +98,8 @@ public final class World implements IDrawable, IEvolvable<World> {
                         case FOCUS:
                             player.addFocus(180f);
                             break;
+                        case SUPER:
+                            player.addSupertime(20f);
                         default:
                             player.addFocus(15f);
                             player.shrink(4f);

@@ -24,6 +24,7 @@ public class Player implements IEntity<Player> {
     
     private float capturePower;
     private float captureBoost;
+    private float supertime;
     private float health;
     private float maxHealth;
     private float focus;
@@ -39,6 +40,8 @@ public class Player implements IEntity<Player> {
     private float cachedMinorRadius;
     private float cachedFociiSeparation;
     private float cachedMaxFociiSeparation;
+    private float cachedCaptureUpperBoundSq;
+    private CVector cachedCaptureCenter;
     
     
     protected Player(float x, float y) {
@@ -52,6 +55,7 @@ public class Player implements IEntity<Player> {
         health = 100;
         focus = 0;
         maxFocus = 1000;
+        supertime = 0;
         
         refreshCachedVariables();
         
@@ -65,6 +69,9 @@ public class Player implements IEntity<Player> {
         cachedFociiSeparation = calculateFociiDistance();
         cachedMajorRadius = calculateCaptureMajorRadius();
         cachedMinorRadius = calculateCaptureMinorRadius();
+        
+        cachedCaptureUpperBoundSq = calculateCaptureUpperBoundSq();
+        cachedCaptureCenter = calculateCaptureCenter();
         
     }
     public void setEffectiveCaptureRadius(float rad) {
@@ -116,9 +123,19 @@ public class Player implements IEntity<Player> {
                 Math.min(amount + focus, maxFocus)
         );
     }
+    public void addSupertime(float amount) {
+        supertime = Math.min(
+                Math.max(0, supertime+amount)
+                ,
+                30f);
+    }
     
+    // Capture radius
     private float boostMultiplier() {
         return (float)(1 - Math.exp(-5f*focus/maxFocus));
+    }
+    private float getSuperBonusRadius() {
+        return supertime*10f;
     }
     public float getCaptureEffectiveRadius() {
         // The capture boost only takes effect if the player has remaining focus.
@@ -127,8 +144,10 @@ public class Player implements IEntity<Player> {
         // has a lot.
         float cb = captureBoost;
         cb *= boostMultiplier();
-        return captureEffectiveRadius + cb;
+        return captureEffectiveRadius + getSuperBonusRadius() + cb;
     }
+    /////////////////
+    
     public float getFociiDistance() {
         return cachedFociiSeparation;
     }
@@ -172,18 +191,21 @@ public class Player implements IEntity<Player> {
                 (0d-Math.pow(getFociiDistance()/2d, 2)+Math.sqrt(Math.pow(getFociiDistance()/2d, 4) + (4*Math.pow(getCaptureEffectiveRadius(), 4))))/2d
         );
     }
+    public float calculateCaptureUpperBoundSq() {
+        return (float)Math.pow(getCaptureMajorRadius(),2);
+    }
     //This method should be QUICK. It will just give a rough upper bound.
     public float getCaptureUpperBoundSq() {
-        return (float)Math.pow(2f*getCaptureMajorRadius() - getCollideRadius(),2);
+        return cachedCaptureUpperBoundSq;
     }
     
     public float getCapturePower() {
-        return capturePower;
+        return capturePower + supertime;
     }
     public float getEffectiveRadius() {
         return captureEffectiveRadius;
     }
-    public CVector getCaptureCenter() {
+    private CVector calculateCaptureCenter() {
         //The collision circle is centered on one of the focii.
         CVector pv;
         
@@ -194,6 +216,10 @@ public class Player implements IEntity<Player> {
         pv = new CVector(cx,cy);
         return pv;
     }
+    public CVector getCaptureCenter() {
+        return cachedCaptureCenter;
+    }
+    
     
     // From implementing IDrawable
     @Override
@@ -223,7 +249,8 @@ public class Player implements IEntity<Player> {
         //Drawing the capture ellipse
         GLDrawHelper.setStrokeWidth(1);
         float extraBlue = 0.3f*boostMultiplier()*captureBoost/capturePower;
-        GLDrawHelper.setColor(0.3f,0.3f,0.3f+extraBlue);
+        float extraRed = supertime/20f*0.7f;
+        GLDrawHelper.setColor(0.3f+extraRed,0.3f,0.3f+extraBlue);
         CVector pv = getCaptureCenter();
         float cx = pv.x, cy = pv.y;
         GLDrawHelper.ellipse(cx, cy, getCaptureMinorRadius(), getCaptureMajorRadius(), captureAngle);
@@ -244,6 +271,7 @@ public class Player implements IEntity<Player> {
         pos.x += vel.x * secondsElapsed;
         pos.y += vel.y * secondsElapsed;
         addFocus(-secondsElapsed*captureBoost);
+        addSupertime(-secondsElapsed);
         
         refreshCachedVariables();
     }
@@ -255,16 +283,19 @@ public class Player implements IEntity<Player> {
         p.setCollideRadius(collideRadius);
         p.setEffectiveCaptureRadius(captureEffectiveRadius);
         p.setFociiRelativeDistance(fociiSeparationRelative);
-        p.capturePower = this.capturePower;
-        p.health = this.health;
-        p.maxHealth = this.maxHealth;
-        p.focus = this.focus;
-        p.maxFocus = this.maxFocus;
-        p.captureBoost = this.captureBoost;
-        p.cachedFociiSeparation = this.cachedFociiSeparation;
-        p.cachedMajorRadius = this.cachedMajorRadius;
-        p.cachedMinorRadius = this.cachedMinorRadius;
-        p.cachedMaxFociiSeparation = this.cachedMaxFociiSeparation;
+        p.capturePower =                this.capturePower;
+        p.health =                      this.health;
+        p.maxHealth =                   this.maxHealth;
+        p.focus =                       this.focus;
+        p.maxFocus =                    this.maxFocus;
+        p.captureBoost =                this.captureBoost;
+        p.cachedFociiSeparation =       this.cachedFociiSeparation;
+        p.cachedMajorRadius =           this.cachedMajorRadius;
+        p.cachedMinorRadius =           this.cachedMinorRadius;
+        p.cachedMaxFociiSeparation =    this.cachedMaxFociiSeparation;
+        p.supertime =                   this.supertime;
+        p.cachedCaptureUpperBoundSq =   this.cachedCaptureUpperBoundSq;
+        p.cachedCaptureCenter =         this.cachedCaptureCenter.deepClone();
         
         return p;
     }
@@ -286,19 +317,21 @@ public class Player implements IEntity<Player> {
     
     public boolean inCaptureRange(float x, float y) {
         
-        //Quickly answer no if it's obvious
-        float dist2 = (float)(Math.pow(x - pos.x, 2) + Math.pow(y - pos.y,2));
-        if (dist2 > getCaptureUpperBoundSq())
-            return false;
-        
         CVector captureCenter = getCaptureCenter();
+        
         float cache,relX, relY;
         cache = x - captureCenter.x;
         relY = (y - captureCenter.y);
+        
+        //Quickly answer no if it's obvious
+        float dist2 = (float)(Math.pow(cache, 2) + Math.pow(relY,2));
+        if (dist2 > getCaptureUpperBoundSq())
+            return false;
+        
         //Rotate relX and relY so their coordinates align with those of the capture ellipse.
         relX = (float)((Math.cos(captureAngle)*cache) + (Math.sin(captureAngle)*relY));
         relY = (float)((-Math.sin(captureAngle)*cache) + (Math.cos(captureAngle)*relY));
-        relY = relY;
+        
         return (Math.pow(relY/getCaptureMinorRadius(),2) + Math.pow(relX/getCaptureMajorRadius(),2) <= 1);
     }
     public float distanceFrom(float x, float y) {

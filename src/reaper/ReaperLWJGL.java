@@ -25,9 +25,9 @@ public class ReaperLWJGL {
     private long gameWindow;
     private final long minFrameWaitNanoTime = Math.round(1000*1000*1000/120);
     
-    private final int WIDTH = 1200;
-    private final int HEIGHT = 900;
-    private final float scale = 1.2f;
+    private final int WIDTH = 1600;
+    private final int HEIGHT = 1000;
+    private final float scale = 1.0f;
     
     private ReaperFrameLooper reaperFrameLoop;
     

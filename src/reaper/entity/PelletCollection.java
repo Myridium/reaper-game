@@ -101,12 +101,29 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             }
         }
     }
-    
+    public boolean isPelletEndangered(Pellet p, Player player) {
+        return player.inCaptureRange(p.getX(), p.getY());
+    }
     public List<Pellet> getEndangeredPellets(Player player) {
         // Collects pellets in "pellets" matching the criterion.
         // In this case, the criterion is whether or not they are in the player's capture range.
+        List<Pellet> pelletsInCaptureRange = new ArrayList<>();
+        List<Pellet> pL = pellets;
+        int pLength = pL.size();
+        Pellet[] pA = new Pellet[pLength];
+        pL.toArray(pA);
+        
+        for (int i=0; i < pLength; i++) {
+            Pellet p = pA[i];
+            if (isPelletEndangered(p,player))
+                pelletsInCaptureRange.add(p);
+        }
+        
+        /*
+        This is slow!! Despite being more elegant.
         List<Pellet> pelletsInCaptureRange = pellets.stream()
                 .filter(p -> player.inCaptureRange(p.getX(), p.getY())).collect(Collectors.toList());
+        */
         return pelletsInCaptureRange;
     }
     public void setSpawnCenter(float x, float y) {
@@ -134,7 +151,17 @@ public final class PelletCollection implements IEntity<PelletCollection> {
     private void queueRandomPellet() {
         nextPelletNanoTime = Math.round(Math.random()*(maxSpawnTime - minSpawnTime)) + minSpawnTime;
     }
+    private float randSpawnVel(Pellet.Type pType) {
+        switch (pType) {
+            case SUPER:
+                return (float)Math.random()*(spawnVelMaxMag-spawnVelMinMag)/2f + spawnVelMinMag;
+            default:
+                return (float)Math.random()*(spawnVelMaxMag-spawnVelMinMag) + spawnVelMinMag;
+        }
+    }
     private void spawnRandomPellet() {
+        Pellet.Type type = randPelletType();
+        
         float angle = (float)(Math.random()*2*Math.PI);
         float xSpawn = spawnDiskCenter.x + (spawnRadius*(float)Math.cos(angle));
         float ySpawn = spawnDiskCenter.y + (spawnRadius*(float)Math.sin(angle));
@@ -142,16 +169,15 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         //The velocity of this new pellet should point in toward the circle.
         //The angle of its velocity should have at least a pi/2 separation from the spawn angle
         float vangle = (float)((angle + Math.PI/2) + (Math.random()*Math.PI));
-        float vmag = (float)Math.random()*(spawnVelMaxMag-spawnVelMinMag) + spawnVelMinMag;
+        float vmag = randSpawnVel(type);
         float vxSpawn = vmag * (float)Math.cos(vangle);
         float vySpawn = vmag * (float)Math.sin(vangle);
         
         CVector xySpawn = new CVector(xSpawn,ySpawn);
         CVector vvSpawn = new CVector(vxSpawn,vySpawn);
-        Pellet.Type type = randPelletType();
         
         float rotAngle = 0;
-        float rotVel = (float)(Math.random()*Math.PI);
+        float rotVel = (float)(2f*Math.random()*Math.PI-Math.PI);
         
         
         
@@ -167,7 +193,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             return Pellet.Type.FOCUS;
         if (rand < 0.145)
             return Pellet.Type.HOMING;
-        if (rand < 0.150)
+        if (rand < 0.1475)
             return Pellet.Type.SUPER;
         return Pellet.Type.NORMAL;
     }
@@ -499,6 +525,13 @@ public final class PelletCollection implements IEntity<PelletCollection> {
     
     public List<Pellet> getPellets() {
         return pellets;
+    }
+    
+    public Pellet[] getPelletsArray() {
+        int l = pellets.size();
+        Pellet[] pL = new Pellet[l];
+        pellets.toArray(pL);
+        return pL;
     }
     
     /**

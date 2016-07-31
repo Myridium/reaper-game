@@ -46,4 +46,7 @@ public class CVector {
     public static float dist(CVector v1, CVector v2) {
         return v1.subtract(v2).mag();
     }
+    public CVector deepClone() {
+        return new CVector(x,y);
+    }
 }
