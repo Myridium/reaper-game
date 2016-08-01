@@ -6,8 +6,11 @@
 package reaper;
 
 import java.awt.Color;
-import java.awt.Font;
+import java.nio.ByteBuffer;
+import java.nio.FloatBuffer;
+import org.lwjgl.BufferUtils;
 import static org.lwjgl.opengl.GL11.*;
+import static org.lwjgl.stb.STBEasyFont.stb_easy_font_print;
 
 /**
  *
@@ -20,11 +23,34 @@ public class GLDrawHelper {
     //Number of segments per pixel size of the major axis
     private static final float ELLIPSE_ACCURACY = 1.7f;
     
-    /*
-    public static void writeText(float x, float y, String str, Color c) {
-        // Can't work out how to do this :( 
+    
+    //Very inefficient!
+    //x,y specifies the top-right corner of the text.
+    public static void drawString(float x, float y, String text, float scale) {	
+        
+        // For some reason, 'EasyFont' will draw the text reflected in the y axis.
+        
+        glPushMatrix();
+            glTranslatef(x,y,0);
+            FloatBuffer fb = BufferUtils.createFloatBuffer(16);
+            BufferUtils.zeroBuffer(fb);
+            fb.put(0,scale);
+            fb.put(5,-scale);
+            fb.put(10,1);
+            fb.put(15,1);
+            glMultMatrixf(fb);
+
+            //270 bytes per character is the recommended amount. It is not enough.
+            //ByteBuffer charBuffer = BufferUtils.createByteBuffer(text.length() * 270);
+            ByteBuffer charBuffer = BufferUtils.createByteBuffer(text.length() * 540);
+            int quads = stb_easy_font_print(0, 0, text, null, charBuffer);
+
+            glEnableClientState(GL_VERTEX_ARRAY);
+            glVertexPointer(2, GL_FLOAT, 16, charBuffer);
+            glDrawArrays(GL_QUADS, 0, quads*4);
+            glDisableClientState(GL_VERTEX_ARRAY);
+        glPopMatrix();
     }
-    */
     public static void setColor(float red, float green, float blue) {
         glColor3f(red,green,blue);
     }

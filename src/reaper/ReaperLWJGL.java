@@ -27,15 +27,23 @@ public class ReaperLWJGL {
     private final long minFrameWaitNanoTime = Math.round(1000*1000*1000/120);
     private final int WIDTH = 1600;
     private final int HEIGHT = 1000;
-    private final float scale = 1.0f;
+    private final float SCALE = 1.0f;
+    
+    
+    private final boolean FPS_CAPPED = true;
+    
+    // Stuff related to displaying the FPS
+    private final boolean TRACK_FPS = true;
+    private final int FPS_DISPLAY_MVA = 200;
+    private int[] pastFPS;
     
     private ReaperFrameLooper reaperFrameLoop;
     
     private int displayWidth() {
-        return Math.round(WIDTH*scale);
+        return Math.round(WIDTH*SCALE);
     }
     private int displayHeight() {
-        return Math.round(HEIGHT*scale);
+        return Math.round(HEIGHT*SCALE);
     }
     public void run() throws InterruptedException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException {
         System.out.println("LWJGL Version: " + Version.getVersion());
@@ -54,6 +62,14 @@ public class ReaperLWJGL {
     }
     
     private void init() {
+        
+        if (TRACK_FPS) {
+            pastFPS = new int[FPS_DISPLAY_MVA];
+            for (int i=0; i < FPS_DISPLAY_MVA; i++) {
+                pastFPS[i] = 0;
+            }
+        }
+        
         // Setup an error callback. The default implementation
 	// will print the error message in System.err.
 	GLFWErrorCallback.createPrint(System.err).set();
@@ -133,13 +149,17 @@ public class ReaperLWJGL {
         // Run the rendering loop until the user has attempted to close
         // the window or has pressed the ESCAPE key.
         while ( !glfwWindowShouldClose(gameWindow) ) {
+                
+                long elapsedNanoTime;
             
                 // Putting on a frame cap (of ~120fps when this comment was made)
-                while( System.nanoTime() - currentTime < minFrameWaitNanoTime) {
-                    Thread.sleep(10);
+                if (FPS_CAPPED) {
+                    while( System.nanoTime() - currentTime < minFrameWaitNanoTime) {
+                        Thread.sleep(2);
+                    }
                 }
                 
-            
+                elapsedNanoTime = System.nanoTime() - currentTime;
                 currentTime = System.nanoTime();
             
                 glClear(GL_COLOR_BUFFER_BIT); // clear the framebuffer
@@ -148,9 +168,15 @@ public class ReaperLWJGL {
                 // invoked during this call.
                 glfwPollEvents();
 
-                
+                // Draw the FPS if that is configured:
+                if (TRACK_FPS) {
+                    int fps = (int)(1000l*1000l*1000l/elapsedNanoTime);
+                    pushFPS(fps);
+                GLDrawHelper.drawString(0, HEIGHT, String.valueOf(averagedFPS()),10);
+                }
                 // Where all the game logic is handled:
                 reaperFrameLoop.frame();
+                
                 
                 glfwSwapBuffers(gameWindow); // swap the color buffers
                 
@@ -160,6 +186,21 @@ public class ReaperLWJGL {
         
         
         
+    }
+    
+    private void pushFPS(int fps) {
+        for (int i=0; i < FPS_DISPLAY_MVA - 1; i++) {
+            pastFPS[i] = pastFPS[i+1];
+        }
+        pastFPS[FPS_DISPLAY_MVA-1]=fps;
+    }
+    
+    private int averagedFPS() {
+        int sum = 0;
+        for (int i=0; i < FPS_DISPLAY_MVA; i++) {
+            sum += pastFPS[i];
+        }
+        return Math.round((float)sum/FPS_DISPLAY_MVA);
     }
     
 }
