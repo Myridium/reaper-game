@@ -16,7 +16,7 @@ import reaper.input.ControllerReader.JoystickFilteredState;
  */
 public class ReaperFrameLooper {
     
-    final long dt = 1000*1000*1000 / 1000;
+    final long dt = 1000*1000*1000 / 300;
     final long MAX_FRAME_TIME = (1000*1000*1000) / 10;
     ControllerReader cr;
     

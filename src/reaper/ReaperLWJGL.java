@@ -34,7 +34,7 @@ public class ReaperLWJGL {
     
     // Stuff related to displaying the FPS
     private final boolean TRACK_FPS = true;
-    private final int FPS_DISPLAY_MVA = 200;
+    private final int FPS_DISPLAY_MVA = 50;
     private int[] pastFPS;
     
     private ReaperFrameLooper reaperFrameLoop;
