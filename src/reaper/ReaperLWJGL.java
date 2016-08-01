@@ -50,6 +50,8 @@ public class ReaperLWJGL {
         
         try {
             init();
+            System.out.println();
+            System.out.println("Welcome to Reaper.");
             loop();
             
             //Free the window callbacks and destroy the window

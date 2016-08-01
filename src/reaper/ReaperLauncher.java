@@ -41,16 +41,15 @@ public class ReaperLauncher {
         //I do not understand why this works, but if NetBeans provides an argument, then the property is registered as null
         //even though it shouldn't be, and so this line is run anyway, and for some reason this doesn't cause exceptions.
         //It makes no sense.
+        if (System.getProperty("Djava.library.path") == null && System.getProperty("org.lwjgl.librarypath") == null ) {
             System.setProperty("org.lwjgl.librarypath", s);
-        
-        //System.setProperty("org.lwjgl.librarypath", new File("lib/native").getAbsolutePath());
-        //System.setProperty("Djava.library.path", new File("lib/native").getAbsolutePath());
+        }
         
         // This line will set the class-path for the LWJGL library stuff to the "natives/" directory
         // in the same directory as this .jar
         // It's the same thing as providing the "-Djava.library.path="natives/"" switch to the "java -jar" command
         // when running this program.
-        System.setProperty("org.lwjgl.librarypath", new File("lib/native").getAbsolutePath());
+        //System.setProperty("org.lwjgl.librarypath", new File("lib/native").getAbsolutePath());
         //System.setProperty("Djava.library.path", new File("lib/native").getAbsolutePath());
         
         new ReaperLWJGL().run();
