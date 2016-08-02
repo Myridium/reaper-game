@@ -101,6 +101,20 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             }
         }
     }
+    @Override
+    public void drawIfInRectangleBound(float x0, float y0, float width, float height) {
+        
+        PelletCollection.sortPelletsByType(pellets);
+        
+        Pellet.Type pTypeBeingDrawn = null;
+        for (Pellet p : pellets) {
+            if (pTypeBeingDrawn != (pTypeBeingDrawn = p.type)) {
+                //Update the way we need to draw this new type of pellet.
+                p.prepareDraw();
+            }
+            p.drawIfInRectangleBound(x0, y0, width, height);
+        }
+    }
     public boolean isPelletEndangered(Pellet p, Player player) {
         return player.inCaptureRange(p.getX(), p.getY());
     }

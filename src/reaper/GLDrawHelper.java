@@ -98,17 +98,17 @@ public class GLDrawHelper {
     public static void ellipseFillSector(float x, float y, float mrad, float Mrad, float angle, float sectorStartAngle, float sectorAngle) {
        
         int sliceCount = (int)Math.ceil(ELLIPSE_ACCURACY*Mrad*Math.abs(sectorAngle)/TAU);
-        double cache,relX,relY;
+        float cache,relX,relY;
 
         glBegin(GL_TRIANGLE_FAN);
-            glVertex2d(x, y); // center of circle
+            glVertex2f(x, y); // center of circle
             for(int i = 0; i <= sliceCount ; i++) { 
-                cache = Mrad*Math.cos(i * sectorAngle / sliceCount + sectorStartAngle);
-                relY = mrad*Math.sin(i * sectorAngle / sliceCount + sectorStartAngle);
-                relX = (Math.cos(-angle)*cache) + (Math.sin(-angle)*relY);
-                relY = (-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY);
+                cache = (float)(Mrad*Math.cos(i * sectorAngle / sliceCount + sectorStartAngle));
+                relY = (float)(mrad*Math.sin(i * sectorAngle / sliceCount + sectorStartAngle));
+                relX = (float)((Math.cos(-angle)*cache) + (Math.sin(-angle)*relY));
+                relY = (float)((-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY));
                 
-                glVertex2d(
+                glVertex2f(
                     x + relX,
                     y + relY
                 );
@@ -118,16 +118,16 @@ public class GLDrawHelper {
     public static void ellipse(float x, float y, float mrad, float Mrad, float angle) {
        
         int sliceCount = (int)Math.ceil(ELLIPSE_ACCURACY*Mrad);
-        double cache,relX,relY;
+        float cache,relX,relY;
 
         glBegin(GL_LINE_LOOP);
             for(int i = 0; i <= sliceCount ; i++) { 
-                cache = Mrad*Math.cos(i * TAU / sliceCount);
-                relY = mrad*Math.sin(i * TAU / sliceCount);
-                relX = (Math.cos(-angle)*cache) + (Math.sin(-angle)*relY);
-                relY = (-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY);
+                cache = (float)(Mrad*Math.cos(i * TAU / sliceCount));
+                relY = (float)(mrad*Math.sin(i * TAU / sliceCount));
+                relX = (float)((Math.cos(-angle)*cache) + (Math.sin(-angle)*relY));
+                relY = (float)((-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY));
                 
-                glVertex2d(
+                glVertex2f(
                     x + relX,
                     y + relY
                 );
@@ -136,16 +136,16 @@ public class GLDrawHelper {
     }
     public static void ellipseSector(float x, float y, float mrad, float Mrad, float angle, float sectorStartAngle, float sectorAngle) {
         int sliceCount = (int)Math.ceil(ELLIPSE_ACCURACY*Mrad*Math.abs(sectorAngle)/TAU);
-        double cache,relX,relY;
+        float cache,relX,relY;
 
         glBegin(GL_LINE_STRIP);
             for(int i = 0; i <= sliceCount ; i++) { 
-                cache = Mrad*Math.cos(i * sectorAngle / sliceCount + sectorStartAngle);
-                relY = mrad*Math.sin(i * sectorAngle / sliceCount + sectorStartAngle);
-                relX = (Math.cos(-angle)*cache) + (Math.sin(-angle)*relY);
-                relY = (-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY);
+                cache = (float)(Mrad*Math.cos(i * sectorAngle / sliceCount + sectorStartAngle));
+                relY = (float)(mrad*Math.sin(i * sectorAngle / sliceCount + sectorStartAngle));
+                relX = (float)((Math.cos(-angle)*cache) + (Math.sin(-angle)*relY));
+                relY = (float)((-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY));
                 
-                glVertex2d(
+                glVertex2f(
                     x + relX,
                     y + relY
                 );
@@ -155,17 +155,17 @@ public class GLDrawHelper {
     public static void urchin(float x, float y, float sRad, float bRad, int spines, float angle) {
         
         int sliceCount = spines*2;
-        double cache,relX,relY;
+        float cache,relX,relY;
 
         glBegin(GL_LINE_LOOP);
             for(int i = 0; i <= sliceCount ; i++) {
                 float rad = ((bRad - sRad)*(i % 2)) + sRad;
-                cache = rad *Math.cos(i * TAU / sliceCount);
-                relY =  rad *Math.sin(i * TAU / sliceCount);
-                relX =  (Math.cos(-angle)*cache) + (Math.sin(-angle)*relY);
-                relY =  (-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY);
+                cache = rad *(float)Math.cos(i * TAU / sliceCount);
+                relY =  rad *(float)Math.sin(i * TAU / sliceCount);
+                relX =  (float)((Math.cos(-angle)*cache) + (Math.sin(-angle)*relY));
+                relY =  (float)((-Math.sin(-angle)*cache) + (Math.cos(-angle)*relY));
                 
-                glVertex2d(
+                glVertex2f(
                     x + relX,
                     y + relY
                 );

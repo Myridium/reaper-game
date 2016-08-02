@@ -132,7 +132,7 @@ public final class World implements IDrawable, IEvolvable<World> {
         
         for (IEntity e : entities) {
             
-            
+            /*
             float bRad = e.getBoundingRadius();
             // If the entity is out of frame, then don't bother drawing it.
             if (    bRad != -1 && (
@@ -147,9 +147,10 @@ public final class World implements IDrawable, IEvolvable<World> {
                 ) {
                 continue;
             }
+            */
 
             e.prepareDraw();
-            e.draw();
+            e.drawIfInRectangleBound(0,0,width,height);
         }
         
         this.drawAuxilliaries();
