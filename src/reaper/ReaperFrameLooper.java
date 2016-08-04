@@ -82,9 +82,8 @@ public class ReaperFrameLooper {
         }
         //With the time left in the accumulator, spoof a state to be drawn
         World w = world.spoofEvolve(accumulator);
-        
-        
         w.draw();
+        
     }
     
 }

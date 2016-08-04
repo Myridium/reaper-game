@@ -193,10 +193,10 @@ public final class World implements IDrawable, IEvolvable<World> {
         for (IEntity e : entities) {
             IEntity cloned = (IEntity)e.deepClone();
             if (e.equals(this.pc)) {
-                w.pc = (PelletCollection)e;
+                w.pc = (PelletCollection)cloned;
             }
             if (e.equals(this.player)) {
-                w.player = (Player)e;
+                w.player = (Player)cloned;
             }
             es.add(cloned);
         }
