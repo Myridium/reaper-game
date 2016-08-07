@@ -9,6 +9,10 @@ import reaper.entity.Player;
 import reaper.entity.World;
 import LWJGLTools.input.ControllerReader;
 import LWJGLTools.input.ControllerReader.*;
+import java.io.File;
+import java.net.URISyntaxException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -40,23 +44,40 @@ public class ReaperFrameLooper {
         
         // Controller reader configuration:
         cr = new ControllerReader();
-        Axis xAxis, yAxis, trigAxis;
+        String dir = "";
+        try {
+            dir = new File(ReaperFrameLooper.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath()).getParent();
+            dir = dir + "/controllerConfig.xml";
+        } catch (URISyntaxException ex) {
+            Logger.getLogger(ReaperFrameLooper.class.getName()).log(Level.SEVERE, null, ex);
+            assert(false);
+        }
         
-        xAxis = new Axis(ControllerID.ONE, AxisID.ZERO,-0.7f,0.7f);
-        yAxis = new Axis(ControllerID.ONE, AxisID.ONE,-0.7f,0.7f);
-        cr.setJoystickAxes(Joystick.LEFT, xAxis, yAxis);
-        cr.setJoystickDeadzone(Joystick.LEFT, 0.4f);
+        if (new File(dir).exists()) {
+            System.out.println("Controller configuration XML found. Will read from this file instead of loading defaults.");
+            cr.readConfig(dir);
+        } else {
+            System.out.println("No controller configuration XML found. Will load defaults.");
+            Axis xAxis, yAxis, trigAxis;
+
+            xAxis = new Axis(ControllerID.ONE, AxisID.ZERO,-0.7f,0.7f);
+            yAxis = new Axis(ControllerID.ONE, AxisID.ONE,0.7f,-0.7f);
+            cr.setJoystickAxes(Joystick.LEFT, xAxis, yAxis);
+            cr.setJoystickDeadzone(Joystick.LEFT, 0.4f);
+
+            xAxis = new Axis(ControllerID.ONE, AxisID.THREE,-0.7f,0.7f);
+            yAxis = new Axis(ControllerID.ONE, AxisID.FOUR,0.7f,-0.7f);
+            cr.setJoystickAxes(Joystick.RIGHT, xAxis, yAxis);
+            cr.setJoystickDeadzone(Joystick.RIGHT, 0.4f);
+
+            trigAxis = new Axis(ControllerID.ONE, AxisID.TWO, -0.7f, 0.7f);
+            cr.setTriggerAxis(Trigger.LEFT, trigAxis);
+
+            trigAxis = new Axis(ControllerID.ONE, AxisID.FIVE, -0.7f, 0.7f);
+            cr.setTriggerAxis(Trigger.RIGHT, trigAxis);
+        }
         
-        xAxis = new Axis(ControllerID.ONE, AxisID.THREE,-0.7f,0.7f);
-        yAxis = new Axis(ControllerID.ONE, AxisID.FOUR,-0.7f,0.7f);
-        cr.setJoystickAxes(Joystick.RIGHT, xAxis, yAxis);
-        cr.setJoystickDeadzone(Joystick.RIGHT, 0.4f);
         
-        trigAxis = new Axis(ControllerID.ONE, AxisID.TWO, -0.7f, 0.7f);
-        cr.setTriggerAxis(Trigger.LEFT, trigAxis);
-        
-        trigAxis = new Axis(ControllerID.ONE, AxisID.FIVE, -0.7f, 0.7f);
-        cr.setTriggerAxis(Trigger.RIGHT, trigAxis);
         
     }
     
@@ -74,14 +95,14 @@ public class ReaperFrameLooper {
         float angle = js.getAngle();
         
         mag*=800;
-        player.setVelocity(mag*(float)Math.cos(angle),mag*(float)Math.sin(-angle));
+        player.setVelocity(mag*(float)Math.cos(angle),mag*(float)Math.sin(angle));
         
         
         js = cr.getJoystickState(ControllerReader.Joystick.RIGHT);
         mag = js.getMag();
         angle = js.getAngle();
         player.setFociiRelativeDistance(mag);
-        player.setCaptureAngle(-angle);
+        player.setCaptureAngle(angle);
         
         float value = cr.getTriggerState(ControllerReader.Trigger.LEFT).getValue();
         player.setCaptureBoost(100f*value);
