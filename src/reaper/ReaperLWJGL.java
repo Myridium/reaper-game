@@ -5,7 +5,7 @@
  */
 package reaper;
 
-import GLDrawing.GLDrawHelper;
+import LWJGLTools.GLDrawing.GLDrawHelper;
 import org.lwjgl.*;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
@@ -13,7 +13,7 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
-import input.ControllerReader;
+import LWJGLTools.input.ControllerReader;
 
 
 /**

@@ -7,7 +7,7 @@ package reaper.entity;
 
 import java.awt.Color;
 import reaper.CVector;
-import GLDrawing.GLDrawHelper;
+import LWJGLTools.GLDrawing.GLDrawHelper;
 
 /**
  *

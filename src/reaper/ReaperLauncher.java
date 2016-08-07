@@ -8,7 +8,7 @@ package reaper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import input.ControllerReader;
+import LWJGLTools.input.ControllerReader;
 
 /**
  *
