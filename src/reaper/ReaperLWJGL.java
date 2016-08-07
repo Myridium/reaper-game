@@ -13,7 +13,7 @@ import org.lwjgl.glfw.*;
 import org.lwjgl.opengl.*;
 import static org.lwjgl.opengl.GL11.*;
 import static org.lwjgl.system.MemoryUtil.*;
-import reaper.input.ControllerReader;
+import input.ControllerReader;
 
 
 /**

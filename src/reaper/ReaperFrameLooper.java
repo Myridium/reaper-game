@@ -7,8 +7,8 @@ package reaper;
 
 import reaper.entity.Player;
 import reaper.entity.World;
-import reaper.input.ControllerReader;
-import reaper.input.ControllerReader.JoystickFilteredState;
+import input.ControllerReader;
+import input.ControllerReader.JoystickFilteredState;
 
 /**
  *

@@ -8,7 +8,7 @@ package reaper;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
-import reaper.input.ControllerReader;
+import input.ControllerReader;
 
 /**
  *
