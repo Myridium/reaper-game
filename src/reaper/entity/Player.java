@@ -303,8 +303,7 @@ public class Player implements IEntity<Player> {
     // From implementing IEntity
     @Override
     public float getBoundingRadius() {
-        // dunno lel
-        return -1;
+        return getCaptureMajorRadius() + (getFociiDistance()/2);
     }
     @Override
     public float getX() {
