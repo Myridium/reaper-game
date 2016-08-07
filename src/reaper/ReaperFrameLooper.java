@@ -8,7 +8,7 @@ package reaper;
 import reaper.entity.Player;
 import reaper.entity.World;
 import LWJGLTools.input.ControllerReader;
-import LWJGLTools.input.ControllerReader.JoystickFilteredState;
+import LWJGLTools.input.ControllerReader.*;
 
 /**
  *
@@ -38,11 +38,29 @@ public class ReaperFrameLooper {
         currentTime = System.nanoTime();
         accumulator = 0;
         
-        cr = new ControllerReader(ControllerReader.ControllerID.ONE);
+        // Controller reader configuration:
+        cr = new ControllerReader();
+        Axis xAxis, yAxis, trigAxis;
+        
+        xAxis = new Axis(ControllerID.ONE, AxisID.ZERO,-0.7f,0.7f);
+        yAxis = new Axis(ControllerID.ONE, AxisID.ONE,-0.7f,0.7f);
+        cr.setJoystickAxes(Joystick.LEFT, xAxis, yAxis);
+        cr.setJoystickDeadzone(Joystick.LEFT, 0.4f);
+        
+        xAxis = new Axis(ControllerID.ONE, AxisID.THREE,-0.7f,0.7f);
+        yAxis = new Axis(ControllerID.ONE, AxisID.FOUR,-0.7f,0.7f);
+        cr.setJoystickAxes(Joystick.RIGHT, xAxis, yAxis);
+        cr.setJoystickDeadzone(Joystick.RIGHT, 0.4f);
+        
+        trigAxis = new Axis(ControllerID.ONE, AxisID.TWO, -0.7f, 0.7f);
+        cr.setTriggerAxis(Trigger.LEFT, trigAxis);
+        
+        trigAxis = new Axis(ControllerID.ONE, AxisID.FIVE, -0.7f, 0.7f);
+        cr.setTriggerAxis(Trigger.RIGHT, trigAxis);
         
     }
     
-    public void frame() throws ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException {
+    public void frame() throws ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException, ControllerReader.NotConfiguredException {
         long elapsedTime = 0 - (currentTime) + (currentTime = System.nanoTime());
         /*In case the simulation can't keep up with the frame advancement, we should put an upper limit on how much the physics will advance per frame*/
         elapsedTime = Math.min(elapsedTime, MAX_FRAME_TIME);

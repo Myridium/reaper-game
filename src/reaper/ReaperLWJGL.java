@@ -46,7 +46,7 @@ public class ReaperLWJGL {
     private int displayHeight() {
         return Math.round(HEIGHT*SCALE);
     }
-    public void run() throws InterruptedException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException {
+    public void run() throws InterruptedException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException, ControllerReader.NotConfiguredException {
         System.out.println("LWJGL Version: " + Version.getVersion());
         
         try {
@@ -125,7 +125,7 @@ public class ReaperLWJGL {
         
     }
     
-    public void loop() throws InterruptedException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException {
+    public void loop() throws InterruptedException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException, ControllerReader.NotConfiguredException {
         
         // This line is critical for LWJGL's interoperation with GLFW's
         // OpenGL context, or any context that is managed externally.
