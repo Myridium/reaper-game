@@ -12,7 +12,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import reaper.CVector;
-import reaper.GLDrawHelper;
+import GLDrawing.GLDrawHelper;
 
 /**
  *

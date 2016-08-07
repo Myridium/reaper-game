@@ -5,6 +5,7 @@
  */
 package reaper;
 
+import GLDrawing.GLDrawHelper;
 import org.lwjgl.*;
 import static org.lwjgl.glfw.Callbacks.*;
 import static org.lwjgl.glfw.GLFW.*;
