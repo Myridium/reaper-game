@@ -21,7 +21,7 @@ public class ReaperLauncher {
      * @throws java.io.IOException
      * @throws java.lang.InterruptedException
      */
-    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException, ControllerReader.NotConfiguredException {
+    public static void main(String[] args) throws IOException, InterruptedException, URISyntaxException, ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException, ControllerReader.NotConfiguredException, ControllerReader.NoSuchButtonException {
         
         // Set the class-path for the LWJGL library stuff to the "natives/" directory
         // in the same directory as this .jar
