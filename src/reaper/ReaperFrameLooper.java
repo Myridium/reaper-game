@@ -5,10 +5,12 @@
  */
 package reaper;
 
+import LWJGLTools.GLDrawing.GLDrawHelper;
 import reaper.entity.Player;
 import reaper.entity.World;
 import LWJGLTools.input.ControllerReader;
 import LWJGLTools.input.ControllerReader.*;
+import java.awt.Color;
 import java.io.File;
 import java.net.URISyntaxException;
 import java.util.logging.Level;
@@ -30,8 +32,8 @@ public class ReaperFrameLooper {
     World world;
     Player player;
     
-    int framesToNextPellet;
-    
+    boolean lastAButtonState;
+    boolean paused;
     
     
     public void init(int width, int height) {
@@ -75,54 +77,86 @@ public class ReaperFrameLooper {
 
             trigAxis = new Axis(ControllerID.ONE, AxisID.FIVE, -0.7f, 0.7f);
             cr.setTriggerAxis(Trigger.RIGHT, trigAxis);
+            
+            cr.setButton(Button.A, new ButtonContainer(ControllerID.ONE, ButtonID.ZERO));
         }
         
+        lastAButtonState = false;
+        paused = false;
+        
+    }
+    
+    public void frame() throws ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException, ControllerReader.NotConfiguredException, NoSuchButtonException {
+        long elapsedTime = 0 - (currentTime) + (currentTime = System.nanoTime());
+        /*In case the simulation can't keep up with the frame advancement, we should put an upper limit on how much the physics will advance per frame*/
+        elapsedTime = Math.min(elapsedTime, MAX_FRAME_TIME);
+        
+        if (!lastAButtonState) {
+            lastAButtonState = updateAButtonState();
+            if (lastAButtonState) {
+                paused = !paused;
+            }
+        } else {
+            lastAButtonState = updateAButtonState();
+        }
+        
+        if (!paused) {
+            accumulator += elapsedTime;
+
+            ///////////////////////*Handle player input here*///////////////////////
+            JoystickFilteredState js;
+            js = cr.getJoystickState(ControllerReader.Joystick.LEFT);
+
+            float mag = js.getMag();
+            float angle = js.getAngle();
+
+            mag*=800;
+            player.setVelocity(mag*(float)Math.cos(angle),mag*(float)Math.sin(angle));
+
+
+            js = cr.getJoystickState(ControllerReader.Joystick.RIGHT);
+            mag = js.getMag();
+            angle = js.getAngle();
+            player.setFociiRelativeDistance(mag);
+            player.setCaptureAngle(angle);
+
+            float value = cr.getTriggerState(ControllerReader.Trigger.LEFT).getValue();
+            player.setCaptureBoost(100f*value);
+
+
+
+
+            ///////////////////////////
+
+            while (accumulator >= dt) {
+                /*Evolve everything by one step*/
+
+                world.evolve(dt);
+
+                accumulator -= dt;
+            }
+            //With the time left in the accumulator, spoof a state to be drawn
+            World w = world.spoofEvolve(accumulator);
+            w.draw();
+        } else {
+            GLDrawHelper.setColor(Color.CYAN);
+            GLDrawHelper.drawString(world.getWidth()/2, world.getHeight()/2+20, "PAUSED", 10, GLDrawHelper.TextAlignment.MIDDLE_TOP);
+        }
         
         
     }
     
-    public void frame() throws ControllerReader.NoControllerException, ControllerReader.NoSuchAxisException, ControllerReader.NotConfiguredException {
-        long elapsedTime = 0 - (currentTime) + (currentTime = System.nanoTime());
-        /*In case the simulation can't keep up with the frame advancement, we should put an upper limit on how much the physics will advance per frame*/
-        elapsedTime = Math.min(elapsedTime, MAX_FRAME_TIME);
-        accumulator += elapsedTime;
-        
-        ///////////////////////*Handle player input here*///////////////////////
-        JoystickFilteredState js;
-        js = cr.getJoystickState(ControllerReader.Joystick.LEFT);
-        
-        float mag = js.getMag();
-        float angle = js.getAngle();
-        
-        mag*=800;
-        player.setVelocity(mag*(float)Math.cos(angle),mag*(float)Math.sin(angle));
-        
-        
-        js = cr.getJoystickState(ControllerReader.Joystick.RIGHT);
-        mag = js.getMag();
-        angle = js.getAngle();
-        player.setFociiRelativeDistance(mag);
-        player.setCaptureAngle(angle);
-        
-        float value = cr.getTriggerState(ControllerReader.Trigger.LEFT).getValue();
-        player.setCaptureBoost(100f*value);
-        
-        
-        
-        
-        ///////////////////////////
-        
-        while (accumulator >= dt) {
-            /*Evolve everything by one step*/
-            
-            world.evolve(dt);
-            
-            accumulator -= dt;
+    private boolean updateAButtonState() throws NoControllerException, NoSuchButtonException {
+        boolean b;
+        try {
+            b = cr.isButtonPressed(Button.A);
+        } catch (NotConfiguredException e) {
+            System.err.println("Something went wrong. The A button is not configured, though I expected it to be.");
+            b = false;
+            assert(false);
         }
-        //With the time left in the accumulator, spoof a state to be drawn
-        World w = world.spoofEvolve(accumulator);
-        w.draw();
         
+        return b;
     }
     
 }

@@ -44,6 +44,13 @@ public final class World implements IDrawable, IEvolvable<World> {
         addEntity(pc);
     }
     
+    public int getWidth() {
+        return width;
+    }
+    public int getHeight() {
+        return height;
+    }
+    
     public Player getPlayer() {
         return player;
     }
