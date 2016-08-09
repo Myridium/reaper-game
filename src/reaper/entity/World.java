@@ -80,8 +80,14 @@ public final class World implements IDrawable, IEvolvable<World> {
                 float accValue = p.getParam(0);
                 accValue = accValue*(float)Math.pow(distFromPlayer,1) * (float)Math.exp(-distFromPlayer/50f);
                 
-                CVector dir = CVector.normVector(p.getXY(), playerVect).multiply(accValue*secondsElapsed);
+                CVector toPlayerVect = CVector.normVector(p.getXY(), playerVect);
+                
+                CVector dir = toPlayerVect.multiply(accValue*secondsElapsed);
                 p.addVel(dir);
+                
+                // For aesthetic appeal, also add spin to the pellet.
+                float extraRotVel = CVector.scalarCross(p.vel,toPlayerVect.multiply(accValue))*secondsElapsed/100000f;
+                p.addRotVel(extraRotVel);
                 
             }
             // At the moment, this could just be done for pellets that are in capture range

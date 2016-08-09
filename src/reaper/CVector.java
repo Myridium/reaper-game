@@ -49,4 +49,20 @@ public class CVector {
     public CVector deepClone() {
         return new CVector(x,y);
     }
+    public float angle() {
+        return (float)Math.atan2(y, x);
+    }
+    public static CVector fromPolar(float angle, float magnitude) {
+        CVector v;
+        float x,y;
+        x = (float)Math.cos(angle)*magnitude;
+        y = (float)Math.sin(angle)*magnitude;
+        v = new CVector(x,y);
+        return v;
+    }
+    public static float scalarCross(CVector v1, CVector v2) {
+        float angle = v2.angle() - v1.angle();
+        float mag = v2.mag()*v1.mag();
+        return mag*(float)Math.sin(angle);
+    }
 }

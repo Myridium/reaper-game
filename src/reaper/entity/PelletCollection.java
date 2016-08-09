@@ -207,6 +207,10 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             return Pellet.Type.HOMING;
         if (rand < 0.1475)
             return Pellet.Type.SUPER;
+        /*
+        if (rand < 0.14875)
+            return Pellet.Type.MULTI;
+        */
         return Pellet.Type.NORMAL;
     }
     private void remove(Pellet p) {
@@ -268,6 +272,9 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         float rotAngle;
         float rotVel;
         float[] evolveParams;
+        
+        // Radians per second
+        private static final float MAX_ROT_VEL_MAG = 10;
 
         @Override
         public int getLayer() {
@@ -282,9 +289,14 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             pos.y += secondsPassed * vel.y;
             
             // The homing pellet homes!
-            // This is handled by the World physics though.
+            // This is handled by the World physics though, because this requires knowledge
+            // of the player position.
             
             rotAngle += secondsPassed*rotVel;
+            
+            if (this.type == Type.MULTI) {
+                //
+            }
             
         }
 
@@ -324,7 +336,8 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             HEALTH,
             FOCUS,
             SUPER,
-            HOMING;
+            HOMING,
+            MULTI;
             
             /*
             public Type deepClone() {
@@ -337,6 +350,11 @@ public final class PelletCollection implements IEntity<PelletCollection> {
             */
         }
         
+        public void addRotVel(float extraRotVel) {
+            rotVel += extraRotVel;
+            rotVel = Math.max(-MAX_ROT_VEL_MAG, rotVel);
+            rotVel = Math.min(MAX_ROT_VEL_MAG, rotVel);
+        }
         public static Color defaultColorOf(Type t) {
             Color c;
             switch (t) {
@@ -353,6 +371,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                     c = new Color(0xFFD86DB1,true);
                     break;
                 case HOMING:
+                case MULTI:
                     c = Color.RED;
                     break;
                 default:
@@ -379,6 +398,8 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                     return 10f;
                 case HOMING:
                     return 16f;
+                case MULTI:
+                    return 64;
                 default:
                     return 5f;
             }
@@ -392,9 +413,11 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                 case FOCUS:
                     return 20f;
                 case SUPER:
-                    return 30;
+                    return 30f;
                 case HOMING:
                     return 5f;
+                case MULTI:
+                    return 200f;
                 default:
                     return 1.f;
             }
@@ -410,6 +433,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                 case SUPER:
                     return 75f;
                 case HOMING:
+                case MULTI:
                     return 100f;
                 default:
                     return 0f;
@@ -465,6 +489,7 @@ public final class PelletCollection implements IEntity<PelletCollection> {
                 case SUPER:
                     return 5f;
                 case HOMING:
+                case MULTI:
                     return 2f;
                 default:
                     return 1f;
@@ -488,19 +513,23 @@ public final class PelletCollection implements IEntity<PelletCollection> {
         
         @Override
         public void draw() {
+            float rad  = getRadius();
             
-            if (type == Type.HOMING) {
-                float rad = getRadius();
-                GLDrawHelper.urchin(pos.x, pos.y, rad*0.75f, rad, 10, rotAngle);
-                return;
-            }
-            if (type == Type.SUPER) {
-                float rad = getRadius();
-                GLDrawHelper.urchin(pos.x, pos.y, rad*0.5f, rad, 5, rotAngle);
-                return;
+            switch(type) {
+                case HOMING:
+                    GLDrawHelper.urchin(pos.x, pos.y, rad*0.75f, rad, 10, rotAngle);
+                    break;
+                case SUPER:
+                    GLDrawHelper.urchin(pos.x, pos.y, rad*0.5f, rad, 5, rotAngle);
+                    break;
+                case MULTI:
+                    GLDrawHelper.urchinFill(pos.x,pos.y,rad*0.75f, rad, 10, rotAngle);
+                    break;
+                default:
+                    GLDrawHelper.circle(pos.x, pos.y, getRadius());
             }
                 
-            GLDrawHelper.circle(pos.x, pos.y, getRadius());
+            
             
         }
         @Override
