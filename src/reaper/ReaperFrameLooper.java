@@ -32,11 +32,11 @@ public class ReaperFrameLooper {
     World world;
     Player player;
     
-    boolean lastAButtonState;
+    ControllerReader.ButtonListener startListener;
     boolean paused;
     
     
-    public void init(int width, int height) {
+    public void init(int width, int height) throws NotConfiguredException, NoControllerException, NoSuchButtonException {
      
         world = new World(width,height);
         player = world.getPlayer();
@@ -78,10 +78,11 @@ public class ReaperFrameLooper {
             trigAxis = new Axis(ControllerID.ONE, AxisID.FIVE, -0.7f, 0.7f);
             cr.setTriggerAxis(Trigger.RIGHT, trigAxis);
             
-            cr.setButton(Button.A, new ButtonContainer(ControllerID.ONE, ButtonID.ZERO));
+            cr.setButton(Button.START, new ButtonContainer(ControllerID.ONE, ButtonID.SEVEN));
         }
         
-        lastAButtonState = false;
+        startListener = cr.newButtonListener(Button.START);
+        
         paused = false;
         
     }
@@ -91,13 +92,9 @@ public class ReaperFrameLooper {
         /*In case the simulation can't keep up with the frame advancement, we should put an upper limit on how much the physics will advance per frame*/
         elapsedTime = Math.min(elapsedTime, MAX_FRAME_TIME);
         
-        if (!lastAButtonState) {
-            lastAButtonState = updateAButtonState();
-            if (lastAButtonState) {
-                paused = !paused;
-            }
-        } else {
-            lastAButtonState = updateAButtonState();
+        startListener.update();
+        if (startListener.isFreshlyPressed()) {
+            paused = !paused;
         }
         
         if (!paused) {
@@ -144,19 +141,6 @@ public class ReaperFrameLooper {
         }
         
         
-    }
-    
-    private boolean updateAButtonState() throws NoControllerException, NoSuchButtonException {
-        boolean b;
-        try {
-            b = cr.isButtonPressed(Button.A);
-        } catch (NotConfiguredException e) {
-            System.err.println("Something went wrong. The A button is not configured, though I expected it to be.");
-            b = false;
-            assert(false);
-        }
-        
-        return b;
     }
     
 }
